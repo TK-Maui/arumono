@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ARUMONO 1台回し版</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Dela+Gothic+One&family=Share+Tech+Mono&display=swap">
+<style>
+:root{
+  --bg:#E4E7E0;--surface:#F2F4EE;--surface2:#E8EBE4;--ink:#1C221F;--muted:#5B665F;--line:#C3C9BE;
+  --hazard:#C99700;--hazard-ink:#1C1A10;--blood:#B3261E;
+  --sg:#2E8B57;--sy:#C99700;--sr:#C62828;
+  --back:#2B332E;--back-ink:#DDE3DA;--shade:rgba(20,26,22,.62);
+  --display:"Dela Gothic One","BIZ UDPGothic",system-ui,sans-serif;
+  --body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --mono:"Share Tech Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#131815;--surface:#1C231F;--surface2:#232B26;--ink:#E3E8E0;--muted:#94A096;--line:#343F38;
+  --hazard:#E5B82A;--hazard-ink:#15130A;--blood:#EF5A50;--sg:#3FB373;--sy:#E5B82A;--sr:#EF5350;
+  --back:#3A453E;--back-ink:#E3E8E0;--shade:rgba(0,0,0,.7);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131815;--surface:#1C231F;--surface2:#232B26;--ink:#E3E8E0;--muted:#94A096;--line:#343F38;
+  --hazard:#E5B82A;--hazard-ink:#15130A;--blood:#EF5A50;--sg:#3FB373;--sy:#E5B82A;--sr:#EF5350;
+  --back:#3A453E;--back-ink:#E3E8E0;--shade:rgba(0,0,0,.7);color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:0 40px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--hazard);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 0;margin-inline:-16px;padding-inline:16px}
+.tape{height:8px;background:repeating-linear-gradient(-45deg,var(--hazard) 0 12px,var(--hazard-ink) 12px 24px);margin-inline:-16px;margin-top:10px}
+.toprow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+h1{font-family:var(--display);font-weight:400;font-size:22px;margin:0;letter-spacing:.02em}
+h1 small{font-family:var(--body);font-size:12px;color:var(--muted);margin-left:8px;letter-spacing:.08em}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1.5px solid var(--ink);border-radius:3px;font-weight:700;font-size:13px}
+.badge.area{background:var(--ink);color:var(--bg)}
+.meter{flex:1 1 260px;min-width:0}
+.meter .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.meter .lab b{font-family:var(--mono);font-size:20px;color:var(--ink);letter-spacing:0}
+.meter .lab b.hot{color:var(--blood)}
+.bar{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:2px}
+.bar i{height:12px;background:var(--surface2);border:1px solid var(--line)}
+.bar i.on{background:var(--sy);border-color:var(--sy)}
+.bar i.on.hi{background:var(--blood);border-color:var(--blood)}
+.resetbtn{background:none;border:1px solid var(--line);border-radius:3px;padding:4px 10px;font-size:12px;color:var(--muted)}
+.resetbtn.arm{border-color:var(--blood);color:var(--blood)}
+
+/* layout */
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;margin-top:18px;align-items:start}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+section.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px}
+.side{display:flex;flex-direction:column;gap:16px}
+h2{font-size:12px;letter-spacing:.14em;color:var(--muted);margin:0 0 10px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px 14px;font-size:13px;margin-bottom:12px}
+.stats div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:2px}
+.stats span{color:var(--muted)}
+
+/* board rows */
+.board{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px;align-items:stretch;border-top:1px solid var(--line);padding-top:8px}
+.row .rh{display:flex;flex-direction:column;gap:4px;justify-content:center}
+.row .rh .no{font-family:var(--display);font-size:26px;line-height:1}
+.row .rh .sub{font-size:11px;color:var(--muted);line-height:1.3}
+.row.inside .rh .no{color:var(--blood);font-size:18px}
+.row.inside{background:repeating-linear-gradient(-45deg,transparent 0 10px,color-mix(in srgb,var(--blood) 7%,transparent) 10px 20px);border-radius:3px}
+.cells{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;align-items:flex-start;padding-bottom:4px}
+.empty{font-size:12px;color:var(--muted);align-self:center}
+.gbtn{border:1.5px dashed var(--hazard);background:none;border-radius:3px;font-size:12px;padding:4px 8px;margin-top:4px}
+
+/* far track */
+.far{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:420px}
+.far i{height:40px;border:1px solid var(--line);border-radius:3px;display:grid;place-items:center;font-style:normal;font-size:11px;color:var(--muted);background:var(--surface2)}
+.far i.boss{background:var(--blood);color:#fff;border-color:var(--blood);font-weight:700}
+.farinfo{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* zombie card */
+.zc{width:86px;min-height:92px;border-radius:4px;border:1.5px solid var(--line);background:var(--surface);padding:6px;display:flex;flex-direction:column;gap:3px;text-align:left;position:relative;font-size:11px;line-height:1.3}
+.zc.back{background:var(--back);color:var(--back-ink);border-color:var(--back)}
+.zc .q{font-family:var(--display);font-size:22px;line-height:1;opacity:.8}
+.zc .own{font-weight:700;font-size:11px;border-left:4px solid var(--pc);padding-left:4px}
+.zc .nm{font-weight:700;font-size:12px}
+.zc .hp{font-family:var(--mono);font-size:14px}
+.zc .dg{color:var(--blood)}
+.zc.bossc{border-color:var(--blood);border-width:2px;width:110px}
+.zc.target{outline:2.5px solid var(--hazard);outline-offset:1px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{outline-color:transparent}}
+@media (prefers-reduced-motion:reduce){.zc.target{animation:none}}
+.sign{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;border:2px solid var(--back-ink)}
+.sign.g,.sb.g{background:var(--sg)}.sign.y,.sb.y{background:var(--sy)}.sign.r,.sb.r{background:var(--sr)}
+.dots{display:flex;gap:2px;flex-wrap:wrap;margin-top:auto}
+.dots b{width:8px;height:8px;border-radius:50%;background:var(--blood)}
+.frz{font-size:10px;background:var(--hazard);color:var(--hazard-ink);padding:0 4px;border-radius:2px;align-self:flex-start;font-weight:700}
+
+/* action panel */
+.who{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pchip{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.pchip::before{content:"";width:12px;height:12px;border-radius:2px;background:var(--pc)}
+.hint{font-size:13px;color:var(--muted);margin:0 0 10px}
+.hand{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ic{width:96px;min-height:74px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface2);padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:2px;font-size:12px;line-height:1.3}
+.ic b{font-size:13px}
+.ic .ef{font-family:var(--mono);font-size:15px;margin-top:auto}
+.ic.sel{border-color:var(--hazard);background:color-mix(in srgb,var(--hazard) 18%,var(--surface2));box-shadow:0 0 0 2px var(--hazard)}
+.ic:disabled{opacity:.45;cursor:not-allowed}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1.5px solid var(--ink);background:var(--surface);border-radius:3px;padding:8px 14px;font-weight:700;font-size:14px}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn.warn{border-color:var(--hazard);background:var(--hazard);color:var(--hazard-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.msg{margin-top:10px;font-size:13px;padding:8px 10px;border-left:4px solid var(--hazard);background:var(--surface2)}
+.pend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mini{width:40px;height:54px;border-radius:3px;background:var(--back);position:relative;display:grid;place-items:end center;color:var(--back-ink);font-size:10px;padding-bottom:3px}
+.mini .sign{top:4px;right:4px;width:12px;height:12px}
+
+.players{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.players div{display:flex;justify-content:space-between;padding:4px 6px;border-radius:3px}
+.players div.now{background:var(--surface2);font-weight:700}
+.report{border:1px solid var(--line);border-radius:3px;padding:8px 10px;background:var(--surface2);font-size:13px;margin-bottom:6px}
+.report b{font-family:var(--display);font-weight:400;margin-right:6px}
+.log{max-height:260px;overflow:auto;font-size:12px;display:flex;flex-direction:column;gap:3px;margin:0;padding:0;list-style:none}
+.log li{border-bottom:1px dashed var(--line);padding-bottom:3px}
+.log li .t{color:var(--muted);font-family:var(--mono);margin-right:6px}
+details{font-size:13px}
+details summary{cursor:pointer;font-weight:700}
+details ul{padding-left:18px;margin:8px 0 0}
+
+/* overlay */
+.ov{position:fixed;inset:0;z-index:20;background:var(--shade);display:grid;place-items:center;padding:16px;overflow:auto}
+.dlg{background:var(--surface);border:1px solid var(--line);border-top:8px solid var(--hazard);border-radius:4px;max-width:440px;width:100%;padding:22px 20px;display:flex;flex-direction:column;gap:14px}
+.dlg h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0;text-wrap:balance}
+.dlg p{margin:0}
+.dlg .warnline{font-size:13px;color:var(--blood);font-weight:700}
+.bigcard{border:2px solid var(--ink);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--surface2)}
+.bigcard .nm{font-family:var(--display);font-size:22px}
+.bigcard .row2{display:flex;gap:16px;font-family:var(--mono);font-size:16px}
+.signs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sbtn{border:2px solid var(--line);border-radius:4px;background:var(--surface);padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700}
+.sb{width:26px;height:26px;border-radius:50%;display:block}
+.pcount{display:flex;gap:8px;flex-wrap:wrap}
+.pcount button{width:48px;height:48px;border:1.5px solid var(--ink);border-radius:4px;background:var(--surface);font-family:var(--display);font-size:20px}
+.pcount button.on{background:var(--ink);color:var(--bg)}
+.small{font-size:12px;color:var(--muted)}
+.dlg.wide{max-width:800px}
+.tblwrap{overflow-x:auto;max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:3px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{position:sticky;top:0;background:var(--surface2);font-weight:700;color:var(--muted)}
+.tbl td.hot{color:var(--blood);font-weight:700}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:4px 16px;font-size:13px}
+.sum div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line)}
+.sum span{color:var(--muted)}
+.sum div.full{grid-column:1/-1}
+textarea.exp{width:100%;height:140px;font-family:var(--mono);font-size:12px;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:8px}
+fieldset.opts{border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+fieldset.opts legend{font-weight:700;padding:0 4px}
+fieldset.opts label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+fieldset.opts input{margin-top:4px}
+.seg{display:inline-flex;gap:4px;margin-left:6px}
+.seg button{border:1.5px solid var(--ink);background:var(--surface);border-radius:3px;padding:2px 12px;font-weight:700}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.seg{flex-wrap:wrap}
+.craft{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-width:440px}
+.slot{min-height:70px;border:1.5px dashed var(--line);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;background:var(--surface2);color:var(--muted)}
+.slot b{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink)}
+.slot.filled{border-style:solid;border-color:var(--ink);color:var(--ink);background:var(--surface)}
+button.slot{cursor:pointer;border-color:var(--hazard);color:var(--ink)}
+.ic.mat{background:color-mix(in srgb,var(--sg) 14%,var(--surface2))}
+.tbl tr.cur td{background:color-mix(in srgb,var(--hazard) 22%,transparent);font-weight:700}
+.rescard{border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+.rescard .num{display:block;font-family:var(--mono);font-size:30px;text-align:center;padding:8px;background:var(--back);color:var(--back-ink);letter-spacing:.2em}
+.report .st{display:block;font-size:12px;color:var(--muted)}
+.report.locked{color:var(--muted);background:none;border-style:dashed}
+.filetag{display:inline-block;font-family:var(--display);font-size:16px;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="toprow">
+      <h1>ARUMONO<small>テスト盤 v0.7</small></h1>
+      <span class="badge area" id="hArea">エリア1</span>
+      <span class="badge" id="hTurn">ターン1</span>
+      <div class="meter">
+        <div class="lab"><span>エリア危険度</span><b id="hDanger" class="num">0%</b></div>
+        <div class="bar" id="hBar"></div>
+      </div>
+      <button class="resetbtn" data-act="showlog">記録</button>
+      <button class="resetbtn" id="resetBtn" data-act="reset">最初から</button>
+    </div>
+    <div class="tape"></div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>ゾンビ状況盤</h2>
+      <div class="stats" id="stats"></div>
+      <div class="board" id="board"></div>
+    </section>
+
+    <div class="side">
+      <section class="panel" id="actPanel"></section>
+      <section class="panel">
+        <h2>プレイヤー</h2>
+        <div class="players" id="players"></div>
+      </section>
+      <section class="panel">
+        <h2>研究ファイル</h2>
+        <div id="reports"></div>
+      </section>
+      <section class="panel">
+        <h2>記録</h2>
+        <ul class="log" id="log"></ul>
+      </section>
+      <section class="panel">
+        <details>
+          <summary>このテスト盤のルール</summary>
+          <ul>
+            <li>1ターン：各自「ゾンビを1枚引いて伏せる → 行動A〜Cを1つ」。全員が終えたらゾンビが接近する。</li>
+            <li>伏せゾンビはサイン（緑=平気／黄=ふつう／赤=ヤバい）でしか伝えられない。アプローチゾーン2に来ると表になる。</li>
+            <li>A：アイテムを最大2枚使う／B：アイテムを引く／C：パス。</li>
+            <li>武器には射程がある。いちばん手前のゾンビがいる列（エリア内→1→2→3→4の順）から数えて、釘バット1列、ピストル・マグナム2列、アサルト3列、ライフルは全列。ゾンビがいない列は数えない。</li>
+            <li>エリア内に入った瞬間と、残ったままターンを越えたときに危険度が上がる。100%で失敗。</li>
+            <li>ゾンビ山札が尽きたら、倒したゾンビをシャッフルして山札にする（何度でも）。</li>
+            <li>アイテム山札が尽きたら捨て札を1回だけ山札にできる。2回目に尽きたらもう引けない。山札も全員の手札もなくなったら失敗。</li>
+            <li>倒したゾンビが人数分たまるごとに、意思のあるゾンビが遠方トラックを1マス進む。5マス進むとアプローチゾーン4に現れる。エリア1〜3では倒すとエリア解放と研究レポート1枚。</li>
+            <li>エリアは1→2→3→0。エリア0ではアイテム山札に素材カード6枚（各1枚）が入る。</li>
+            <li>D：調合（エリア0のみ）。手札の素材1枚を調合台の空き枠に置く。4枠そろうと、研究ファイルの解答カード（1〜4番、裏向き）を1番から順にめくって照合する。全部合えば脱出。違った枠で止めて失敗（危険度+30%、素材はすべてアイテム山札へ）。めくった解答カードは表のまま残る。</li>
+            <li>E：試験調合（エリア0のみ）。手札の素材1枚を試験台（2枠）に置く。2枠そろうと、両方が正解に使う素材なら「反応あり」とどちらが先かが分かり、素材は手札に戻る。どちらかが使わない素材なら「爆発」で危険度+20%、素材はアイテム山札へ。</li>
+            <li>研究レポートは推理型。1枚では候補が36〜96通り、2枚でも9〜12通り残り、3枚そろうと1つに決まる。</li>
+            <li>エリア1〜3は、10ターンを生き延びれば、意思のあるゾンビを倒さずに突破できる。その場合そのエリアの研究レポートは手に入らない。</li>
+          </ul>
+        </details>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="ov" id="ov" hidden><div class="dlg" id="dlg"></div></div>
+
+<script>
+const ZT={
+  normal:{name:'ノーマルゾンビ',hp:1,dg:5},
+  big:{name:'デカゾンビ',hp:3,dg:10},
+  toxic:{name:'汚染ゾンビ',hp:2,dg:30},
+  mutant:{name:'異形ゾンビ',hp:5,dg:20},
+  boss:{name:'意思のあるゾンビ',hp:12,dg:50}
+};
+const NEXT={1:2,2:3,3:0};
+const ZDECK={
+  1:{normal:4,big:1},
+  2:{normal:3,big:1,toxic:1},
+  3:{normal:2,big:1,toxic:1,mutant:1},
+  0:{normal:1,big:2,toxic:1,mutant:1}
+};
+const IT={
+  bat:{name:'釘バット',kind:'weapon',atk:1,reach:1},
+  pistol:{name:'ピストル銃',kind:'weapon',atk:2,reach:2},
+  assault:{name:'アサルト銃',kind:'weapon',atk:3,reach:3},
+  rifle:{name:'ライフル銃',kind:'weapon',atk:4,reach:9},
+  magnum:{name:'マグナム銃',kind:'weapon',atk:5,reach:2},
+  grenade:{name:'閃光グレネード',kind:'grenade'},
+  sprayS:{name:'薬品スプレー小',kind:'spray',val:20},
+  sprayL:{name:'薬品スプレー大',kind:'spray',val:50},
+  m1:{name:'血清',kind:'mat',no:1},
+  m2:{name:'銀の液体',kind:'mat',no:2},
+  m3:{name:'青い結晶',kind:'mat',no:3},
+  m4:{name:'薬草',kind:'mat',no:4},
+  m5:{name:'赤い粉',kind:'mat',no:5},
+  m6:{name:'試薬',kind:'mat',no:6}
+};
+const MATS=['m1','m2','m3','m4','m5','m6'];
+const IDECK={
+  1:{bat:2,pistol:2,assault:1,rifle:1,magnum:1,sprayS:2},
+  2:{bat:1,pistol:2,assault:1,rifle:1,magnum:1,grenade:1,sprayS:1,sprayL:1},
+  3:{pistol:1,assault:2,rifle:1,magnum:2,grenade:1,sprayS:1,sprayL:1},
+  0:{assault:2,rifle:2,magnum:2,grenade:1,sprayS:1,sprayL:1}
+};
+const REP={1:{no:'研究レポート①',story:'「ARUMONO＝」'},2:{no:'研究レポート②',story:'「＝IMUKATARUMONO＝」'},3:{no:'研究レポート③',story:'「抗ウイルス剤であり、作製すれば平穏が訪れる」'}};
+const FILES={
+  A:{ans:'3152',r:{1:["「銀の液体」と「薬草」は、隣り合う枠に入れない。", "「青い結晶」も「血清」も使い、「青い結晶」を先に入れる。"],2:["「銀の液体」と「青い結晶」は、隣り合う枠に入れない。", "「血清」も「銀の液体」も使い、「血清」を先に入れる。"],3:["「血清」と「銀の液体」は、隣り合う枠に入れない。", "「血清」も「赤い粉」も使い、「血清」を先に入れる。"]}},
+  B:{ans:'4612',r:{1:["「薬草」は端の枠（1番か4番）に入れる。", "1番の枠の番号は、4番の枠の番号より大きい。"],2:["「試薬」も「血清」も使い、「試薬」を先に入れる。", "3番の枠には、番号が奇数の素材を入れる。"],3:["「銀の液体」は端の枠（1番か4番）に入れる。", "「赤い粉」を入れるなら、真ん中の枠（2番か3番）に。"]}},
+  C:{ans:'5364',r:{1:["「銀の液体」と「赤い粉」は、どちらか一方しか使わない。", "1番の枠の番号は、4番の枠の番号より大きい。"],2:["「青い結晶」も「試薬」も使い、「青い結晶」を先に入れる。", "「血清」と「青い結晶」は、隣り合う枠に入れない。"],3:["「赤い粉」は端の枠（1番か4番）に入れる。", "「血清」と「試薬」は、どちらか一方しか使わない。"]}},
+  D:{ans:'2415',r:{1:["番号がいちばん小さい素材は、2番か3番の枠に入れる。", "「赤い粉」は端の枠（1番か4番）に入れる。"],2:["「青い結晶」と「赤い粉」は、隣り合う枠に入れない。", "「銀の液体」も「薬草」も使い、「銀の液体」を先に入れる。"],3:["「薬草」も「血清」も使い、「薬草」を先に入れる。", "「血清」と「試薬」は、隣り合う枠に入れない。"]}},
+  E:{ans:'6231',r:{1:["「青い結晶」と「試薬」は、隣り合う枠に入れない。", "「試薬」は端の枠（1番か4番）に入れる。"],2:["「血清」は端の枠（1番か4番）に入れる。", "「青い結晶」と「薬草」は、どちらか一方しか使わない。"],3:["「薬草」と「試薬」は、隣り合う枠に入れない。", "「銀の液体」も「青い結晶」も使い、「銀の液体」を先に入れる。"]}},
+  F:{ans:'1543',r:{1:["3番の枠には、番号が偶数の素材を入れる。", "「血清」も「薬草」も使い、「血清」を先に入れる。"],2:["4つの素材の番号を足すと13になる。", "「赤い粉」を入れるなら、真ん中の枠（2番か3番）に。"],3:["「赤い粉」と「試薬」は、どちらか一方しか使わない。", "「薬草」と「試薬」は、どちらか一方しか使わない。"]}}
+};
+const FKEYS=Object.keys(FILES);
+const SURVIVE=10; // このターン数を生き延びると、レポートなしで突破できる
+const CRAFT_PEN=30; // 本調合に失敗したときの危険度上昇
+const MATNO=n=>MATS.find(m=>IT[m].no===+n);
+const PCOL=['#3B7DD8','#D1495B','#2A9D6F','#C98B12','#8E5CC4','#1E9AA8'];
+const SIGN={g:'平気',y:'ふつう',r:'ヤバい'};
+
+let S=null, uid=0, selN=4;
+const OPT={extra:false,drawB:2,startArea:1,file:'R'};
+const ui={sel:null,msg:'',peek:null,peekShow:false,resetArm:false,showLog:false,copied:''};
+
+const $=id=>document.getElementById(id);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pname=i=>`P${i+1}`;
+const cp=()=>(S.startP+S.cur)%S.n;
+function log(t){S.log.unshift({t:`E${S.area}-T${S.turn}`,m:t})}
+function optText(o){const a=['射程ルール'];if(o.extra)a.push('追加ゾンビ');a.push(`行動B=${o.drawB}枚`);if(o.startArea!==1)a.push(`エリア${o.startArea}から開始`);return a.join('／')}
+function rowOf(z){if(S.inside.includes(z))return 0;for(const s of[1,2,3,4])if(S.slots[s].includes(z))return s;return -1}
+function occRows(){const r=[];if(S.inside.length)r.push(0);for(const s of[1,2,3,4])if(S.slots[s].length)r.push(s);return r}
+function reachLabel(r){return r>=9?'全列':`手前${r}列`}
+function effAtk(k,z){const it=IT[k];const i=occRows().indexOf(rowOf(z));return (i>=0&&i<it.reach)?it.atk:0}
+function newZ(type){return {id:++uid,type,owner:null,sign:null,hidden:type!=='boss',dmg:0,frozen:false}}
+function resetZ(z){z.owner=null;z.sign=null;z.hidden=true;z.dmg=0;z.frozen=false;return z}
+function addReport(a){if(!S.reports.some(r=>r.a===a))S.reports.push({a,...REP[a],text:FILES[S.file].r[a]})}
+
+function startGame(n){
+  const file=OPT.file==='R'?FKEYS[Math.floor(Math.random()*FKEYS.length)]:OPT.file;
+  S={n,area:1,startP:0,log:[],reports:[],skipped:[],file,opt:{...OPT},hist:[],result:'プレイ中',
+     st:{kills:0,overkill:0,itemsUsed:0,itemsDrawn:0,maxDanger:0,sprayed:0,crafts:0,tests:0,areaTurns:{}}};
+  const order=[1,2,3,0];
+  for(const a of order){if(a===OPT.startArea)break;addReport(a)}
+  setupArea(OPT.startArea);
+  log(`${n}人でテスト開始（${optText(S.opt)}）。研究ファイル${file}を引いた`);
+}
+function setupArea(a){
+  S.area=a;S.turn=1;S.cur=0;S.startP=0;
+  S.zDeck=[];for(const[k,c]of Object.entries(ZDECK[a]))for(let i=0;i<c*S.n;i++)S.zDeck.push(newZ(k));
+  shuffle(S.zDeck);S.zKilled=[];
+  S.iDeck=[];for(const[k,c]of Object.entries(IDECK[a]))for(let i=0;i<c*S.n;i++)S.iDeck.push(k);
+  if(a===0)MATS.forEach(m=>S.iDeck.push(m));
+  shuffle(S.iDeck);S.iDiscard=[];S.reshuffleUsed=false;
+  S.hands=Array.from({length:S.n},()=>[]);
+  for(let r=0;r<3;r++)for(let p=0;p<S.n;p++)S.hands[p].push(S.iDeck.pop());
+  S.slots={1:[],2:[],3:[],4:[]};S.inside=[];S.pending=[];
+  S.danger=0;S.kills=0;S.bossStep=0;S.bossOn=false;S.bossDead=false;
+  S.canEscape=false;S.craft=[null,null,null,null];S.test=[null,null];S.lastCraft=null;S.lastTest=null;if(a===0)S.revealed=[false,false,false,false];
+  S.used=0;S.drawn=null;S.phase='handoff';
+  ui.sel=null;ui.msg='';
+  log(`エリア${a}開始。ゾンビ山札${S.zDeck.length}枚、アイテム山札${S.iDeck.length}枚${a===0?'（素材6枚を含む）':''}、各自3枚配布`);
+}
+
+/* ---------- turn flow ---------- */
+function drawZombie(){
+  if(!S.zDeck.length && S.zKilled.length){
+    S.zDeck=shuffle(S.zKilled.map(resetZ));S.zKilled=[];
+    log('ゾンビ山札が尽きたので、倒したゾンビをシャッフルして山札にした');
+  }
+  if(!S.zDeck.length){log('ゾンビ山札が空のため、ゾンビは引かなかった');S.phase='action';S.used=0;return}
+  S.drawn=S.zDeck.pop();S.phase='peek';
+}
+function chooseSign(s){
+  const z=S.drawn;z.owner=cp();z.sign=s;z.hidden=true;S.pending.push(z);S.drawn=null;
+  S.phase='action';S.used=0;ui.sel=null;ui.msg='';
+  log(`${pname(cp())}がゾンビを伏せた（サイン：${SIGN[s]}）`);
+}
+function allZ(){const r=[];for(const s of[4,3,2,1])for(const z of S.slots[s])r.push([z,S.slots[s]]);for(const z of S.inside)r.push([z,S.inside]);return r}
+function findZ(id){return allZ().find(([z])=>z.id===id)}
+function takeSel(){const h=S.hands[cp()];const k=h.splice(ui.sel,1)[0];ui.sel=null;return k}
+function discardSel(){const k=takeSel();S.iDiscard.push(k);S.used++;S.st.itemsUsed++;return k}
+
+function attack(id){
+  const f=findZ(id);if(!f)return;const[z,arr]=f;
+  const k=S.hands[cp()][ui.sel];const atk=effAtk(k,z);if(atk<=0)return;discardSel();
+  const t=ZT[z.type];const rem=t.hp-z.dmg;z.dmg+=atk;const dead=z.dmg>=t.hp;
+  if(dead){S.st.kills++;S.st.overkill+=atk-rem}
+  ui.msg=z.hidden
+    ?`${pname(z.owner)}の伏せゾンビに${IT[k].name}（攻撃力${atk}）→ 持ち主の答え：「${dead?'倒れた！':'まだ生きている'}」`
+    :`${t.name}に${IT[k].name}（攻撃力${atk}）→ ${dead?'撃破！':`残り体力${t.hp-z.dmg}`}`;
+  log(ui.msg);
+  if(dead)kill(z,arr);
+  if(S.phase==='action')checkItemsOut();
+}
+function kill(z,arr){
+  arr.splice(arr.indexOf(z),1);
+  if(z.type==='boss'){bossDown();return}
+  S.zKilled.push(z);S.kills++;
+  if(!S.bossOn&&!S.bossDead&&S.bossStep<5&&S.kills%S.n===0){
+    S.bossStep++;
+    log(S.bossStep>=5?'意思のあるゾンビが遠方トラックを進みきった。次の接近で現れる':`意思のあるゾンビが1マス近づいた（${S.bossStep}/5）`);
+  }
+}
+function bossDown(){
+  S.bossDead=true;S.bossOn=false;
+  if(S.area===0){log('エリア0の意思のあるゾンビを倒した。脱出するにはARUMONOの調合が必要');return}
+  addReport(S.area);S.st.areaTurns[S.area]=S.turn;
+  log(`意思のあるゾンビを撃破！${REP[S.area].no}を表にした。エリア${S.area}解放`);
+  S.phase='clear';
+}
+function grenade(slot){
+  discardSel();S.slots[slot].forEach(z=>z.frozen=true);
+  ui.msg=`アプローチゾーン${slot}に閃光グレネード。${S.slots[slot].length}体の進行が1ターン止まる`;log(ui.msg);
+  checkItemsOut();
+}
+function spray(){
+  const k=S.hands[cp()][ui.sel];const v=IT[k].val;discardSel();
+  const before=S.danger;S.danger=Math.max(0,S.danger-v);S.st.sprayed+=before-S.danger;
+  ui.msg=`${IT[k].name}で危険度 ${before}% → ${S.danger}%`;log(ui.msg);
+  checkItemsOut();
+}
+function place(slot){
+  if(S.craft[slot])return;
+  const k=takeSel();S.craft[slot]=k;S.used=2;
+  log(`${pname(cp())}が調合台の${slot+1}番に「${IT[k].name}（${IT[k].no}）」を置いた`);
+  if(S.craft.every(Boolean))resolveCraft();else endTurn();
+}
+function placeTest(slot){
+  if(S.test[slot])return;
+  const k=takeSel();S.test[slot]={k,owner:cp()};S.used=2;
+  log(`${pname(cp())}が試験台の${slot===0?'左':'右'}に「${IT[k].name}（${IT[k].no}）」を置いた`);
+  if(S.test.every(Boolean))resolveTest();else endTurn();
+}
+function resolveTest(){
+  const a=FILES[S.file].ans;const[x,y]=S.test;const nx=String(IT[x.k].no),ny=String(IT[y.k].no);
+  let res;
+  if(a.includes(nx)&&a.includes(ny)){
+    res=a.indexOf(nx)<a.indexOf(ny)?'order':'reverse';
+    S.test.forEach(t=>S.hands[t.owner].push(t.k));
+  }else{
+    res='boom';S.danger+=20;S.test.forEach(t=>S.iDeck.push(t.k));shuffle(S.iDeck);
+  }
+  S.st.tests++;
+  S.lastTest={l:x.k,r:y.k,res};
+  const txt={order:'反応あり：どちらも使う素材。左の素材を先に入れる',reverse:'反応あり：どちらも使う素材。右の素材を先に入れる',boom:'爆発！少なくとも一方は使わない素材（危険度+20%）'}[res];
+  log(`試験調合：「${IT[x.k].name}」＋「${IT[y.k].name}」→ ${txt}`);
+  S.test=[null,null];S.phase='test';
+}
+function resolveCraft(){
+  const ans=FILES[S.file].ans;const rows=[];let failAt=-1;S.st.crafts++;
+  for(let i=0;i<4;i++){
+    const was=S.revealed[i];S.revealed[i]=true;
+    const ok=String(IT[S.craft[i]].no)===ans[i];
+    rows.push({placed:S.craft[i],answer:MATNO(ans[i]),ok,newly:!was});
+    if(!ok){failAt=i;break}
+  }
+  for(let i=rows.length;i<4;i++)rows.push({placed:S.craft[i],answer:null,ok:null,newly:false});
+  S.lastCraft={rows,failAt};
+  const num=S.craft.map(k=>IT[k].no).join('');
+  if(failAt<0){log(`調合：${num} → 解答カード4枚すべて一致。ARUMONO完成！`);S.st.areaTurns[0]=S.turn;S.result='脱出成功';S.phase='win';return}
+  log(`調合：${num} → ${failAt+1}番の解答カードで不一致（正解は「${IT[MATNO(ans[failAt])].name}」）。危険度+${CRAFT_PEN}%`);
+  S.danger+=CRAFT_PEN;S.craft.forEach(k=>S.iDeck.push(k));shuffle(S.iDeck);S.craft=[null,null,null,null];
+  S.phase='craft';
+}
+function drawOne(){
+  if(!S.iDeck.length){
+    if(!S.reshuffleUsed&&S.iDiscard.length){
+      S.iDeck=shuffle(S.iDiscard);S.iDiscard=[];S.reshuffleUsed=true;
+      log('アイテム山札が尽きたので、捨て札をシャッフルして山札にした（このエリアではもう使えない）');
+    }else return false;
+  }
+  S.hands[cp()].push(S.iDeck.pop());S.st.itemsDrawn++;return true;
+}
+function canDraw(){return S.iDeck.length>0||(!S.reshuffleUsed&&S.iDiscard.length>0)}
+function drawAction(){
+  let got=0;for(let i=0;i<S.opt.drawB;i++){if(!drawOne())break;got++}
+  log(got<S.opt.drawB?`${pname(cp())}がアイテムを${got}枚引いた（山札が尽きてこれ以上引けない）`:`${pname(cp())}がアイテムを${got}枚引いた`);
+  endTurn();
+}
+function checkItemsOut(){
+  if(S.phase!=='action')return;
+  if(S.hands.every(h=>!h.length)&&!canDraw())gameOver('アイテム山札も全員の手札もなくなった');
+}
+function endTurn(){
+  if(S.phase!=='action')return;
+  ui.sel=null;ui.msg='';checkItemsOut();if(S.phase!=='action')return;S.cur++;
+  if(S.cur<S.n)S.phase='handoff';else approach();
+}
+function approach(){
+  let inc=0;S.inside.forEach(z=>inc+=ZT[z.type].dg);
+  if(inc){S.danger+=inc;log(`エリア内のゾンビ${S.inside.length}体が残ったまま → 危険度+${inc}%`)}
+  const ns={1:[],2:[],3:[],4:[]};let arr=0,arrN=0,rev=0;
+  for(const s of[1,2,3,4])for(const z of S.slots[s]){
+    if(z.frozen){z.frozen=false;ns[s].push(z);continue}
+    const t=s-1;
+    if(t===0){z.hidden=false;S.inside.push(z);arr+=ZT[z.type].dg;arrN++}
+    else{if(t===2&&z.hidden){z.hidden=false;rev++}ns[t].push(z)}
+  }
+  if(arrN){S.danger+=arr;log(`${arrN}体がエリア内に侵入 → 危険度+${arr}%`)}
+  if(rev)log(`アプローチゾーン2に来た伏せゾンビ${rev}体が表になった`);
+  if(S.bossStep>=5&&!S.bossOn&&!S.bossDead){ns[4].push(newZ('boss'));S.bossOn=true;log('意思のあるゾンビがアプローチゾーン4に現れた！')}
+  S.pending.forEach(z=>ns[4].push(z));
+  if(S.pending.length)log(`伏せゾンビ${S.pending.length}枚をアプローチゾーン4に配置`);
+  S.slots=ns;S.pending=[];
+  if(S.opt.extra){
+    if(!S.zDeck.length&&S.zKilled.length){S.zDeck=shuffle(S.zKilled.map(resetZ));S.zKilled=[];log('ゾンビ山札が尽きたので、倒したゾンビをシャッフルして山札にした')}
+    if(S.zDeck.length){const z=S.zDeck.pop();z.hidden=false;S.slots[4].push(z);log(`追加ゾンビ：${ZT[z.type].name}が表向きでゾーン4に現れた`)}
+  }
+  const dd=Math.min(S.danger,100);S.st.maxDanger=Math.max(S.st.maxDanger,dd);
+  S.hist.push({a:S.area,t:S.turn,d:dd,k:S.kills,z:[1,2,3,4].reduce((x,s)=>x+S.slots[s].length,0),in:S.inside.length,h:S.hands.reduce((x,h)=>x+h.length,0),i:S.iDeck.length});
+  if(S.danger>=100){S.danger=100;gameOver('エリア危険度が100%に達した');return}
+  S.turn++;S.startP=(S.startP+1)%S.n;S.cur=0;S.phase='handoff';
+  if(S.area!==0&&!S.bossDead&&!S.canEscape&&S.turn>SURVIVE){S.canEscape=true;log(`${SURVIVE}ターンを生き延びた。研究レポートを諦めれば、いつでもエリアを突破できる`)}
+}
+function escapeArea(){
+  if(!S.canEscape||S.phase!=='action')return;
+  S.skipped.push(S.area);S.st.areaTurns[S.area]=S.turn;S.bossDead=true;
+  log(`意思のあるゾンビを倒さずにエリア${S.area}を突破した。${REP[S.area].no}は手に入らなかった`);
+  S.phase='clear';
+}
+function gameOver(r){S.phase='over';S.overReason=r;S.st.areaTurns[S.area]=S.turn;S.result=`失敗（${r}）`;log(`失敗：${r}`)}
+function totalTurns(){return Object.values(S.st.areaTurns).reduce((a,b)=>a+b,0)+(S.st.areaTurns[S.area]!=null?0:S.turn)}
+function areaTurnText(a){const at=S.st.areaTurns;return at[a]!=null?`${at[a]}`:(S.area===a?`${S.turn}（途中）`:'-')}
+function summaryRows(){
+  return [['人数',`${S.n}人`],['調整ルール',optText(S.opt)],['結果',S.result],['研究ファイル',S.file],['手に入れたレポート',`${S.reports.length}枚${S.skipped.length?`（突破で諦めた：${S.skipped.map(a=>REP[a].no).join('・')}）`:''}`],
+    ['エリア1のターン数',areaTurnText(1)],['エリア2のターン数',areaTurnText(2)],['エリア3のターン数',areaTurnText(3)],['エリア0のターン数',areaTurnText(0)],
+    ['合計ターン',`${totalTurns()}`],['倒したゾンビ',`${S.st.kills}体`],['余ったダメージ',`${S.st.overkill}`],
+    ['使ったアイテム',`${S.st.itemsUsed}枚`],['引いたアイテム',`${S.st.itemsDrawn}枚`],['調合した回数',`${S.st.crafts}回`],['試験調合の回数',`${S.st.tests}回`],
+    ['スプレーで下げた危険度',`${S.st.sprayed}%`],['最高危険度',`${S.st.maxDanger}%`]];
+}
+function exportText(){
+  const L=['ARUMONO テスト記録'];
+  summaryRows().forEach(([a,b])=>L.push(`${a}: ${b}`));
+  L.push('','[ターンごとの推移] エリア-ターン / 危険度 / 撃破(累計) / 盤上 / エリア内 / 手札合計 / アイテム山札');
+  S.hist.forEach(h=>L.push(`E${h.a}-T${h.t} / ${h.d}% / ${h.k} / ${h.z} / ${h.in} / ${h.h} / ${h.i}`));
+  L.push('','[記録（古い順）]');
+  [...S.log].reverse().forEach(l=>L.push(`${l.t} ${l.m}`));
+  return L.join('\n');
+}
+
+/* ---------- render ---------- */
+function selKey(){return ui.sel!=null&&S.phase==='action'?S.hands[cp()][ui.sel]:null}
+function zCard(z){
+  const t=ZT[z.type];const selK=selKey();
+  const tgt=selK&&IT[selK].kind==='weapon'&&effAtk(selK,z)>0;
+  const cls=['zc'];if(z.hidden)cls.push('back');if(z.type==='boss')cls.push('bossc');if(tgt)cls.push('target');
+  const dots=z.dmg?`<span class="dots">${'<b></b>'.repeat(z.dmg)}</span>`:'';
+  const frz=z.frozen?'<span class="frz">足止め</span>':'';
+  const inner=z.hidden
+    ?`<span class="q">?</span><span class="own" style="--pc:${PCOL[z.owner]}">${pname(z.owner)}</span><span class="sign ${z.sign}" title="${SIGN[z.sign]}"></span>${frz}${dots}`
+    :`<span class="nm">${t.name}</span><span class="hp num">体力 ${t.hp-z.dmg}/${t.hp}</span><span class="dg num">危険度+${t.dg}%</span>${frz}`;
+  const act=tgt?'attack':(z.hidden&&S.phase==='action'?'peek':'');
+  const label=z.hidden?`${pname(z.owner)}の伏せゾンビ（サイン${SIGN[z.sign]}）`:t.name;
+  return `<button class="${cls.join(' ')}" ${act?`data-act="${act}" data-id="${z.id}"`:'tabindex="-1"'} aria-label="${label}">${inner}</button>`;
+}
+function renderBoard(){
+  const selK=selKey();
+  const gre=selK&&IT[selK].kind==='grenade';const mat=selK&&IT[selK].kind==='mat';
+  const farCells=[];for(let pos=0;pos<5;pos++){const here=!S.bossOn&&!S.bossDead&&S.bossStep===pos;farCells.push(`<i class="${here?'boss':''}">${here?'意思のある<br>ゾンビ':`${5-pos}`}</i>`)}
+  const farStatus=(S.skipped.includes(S.area)?'突破済み':S.bossDead?'撃破済み':S.bossOn?'盤上に出現中':S.bossStep>=5?'次の接近で出現':`撃破 ${S.kills%S.n}/${S.n} で1マス前進`)+(S.area!==0&&!S.bossDead?`／${S.canEscape?'レポートなしで突破できる':`${SURVIVE}ターン生き延びるとレポートなしで突破できる（あと${SURVIVE+1-S.turn}ターン）`}`:'');
+  let h=`<div class="row"><div class="rh"><span class="no" style="font-size:16px">遠方</span><span class="sub">意思のある<br>ゾンビ</span></div><div><div class="far">${farCells.join('')}</div><div class="farinfo">${farStatus}</div></div></div>`;
+  const subs={4:'伏せたまま',3:'伏せたまま',2:'ここで表に',1:'次でエリア内'};
+  for(const s of[4,3,2,1]){
+    const cards=S.slots[s].map(zCard).join('')||'<span class="empty">なし</span>';
+    const gb=gre?`<button class="gbtn" data-act="grenade" data-slot="${s}">ここに閃光</button>`:'';
+    h+=`<div class="row"><div class="rh"><span class="no">${s}</span><span class="sub">${subs[s]}</span>${gb}</div><div class="cells">${cards}</div></div>`;
+  }
+  const ins=S.inside.map(zCard).join('')||'<span class="empty">侵入なし</span>';
+  const insDg=S.inside.reduce((a,z)=>a+ZT[z.type].dg,0);
+  h+=`<div class="row inside"><div class="rh"><span class="no">エリア内</span><span class="sub">残ると毎ターン<br>+${insDg}%</span></div><div class="cells">${ins}</div></div>`;
+  if(S.area===0){
+    const slots=S.craft.map((k,i)=>k
+      ?`<div class="slot filled"><span>${i+1}番</span><b>${IT[k].no}</b><span>${IT[k].name}</span></div>`
+      :(mat?`<button class="slot" data-act="place" data-slot="${i}"><span>${i+1}番</span><b>＋</b><span>ここに置く</span></button>`:`<div class="slot"><span>${i+1}番</span><b>・</b><span>空き</span></div>`)).join('');
+    const tslots=S.test.map((t,i)=>t
+      ?`<div class="slot filled"><span>${i?'右':'左'}</span><b>${IT[t.k].no}</b><span>${IT[t.k].name}</span></div>`
+      :(mat?`<button class="slot" data-act="ptest" data-slot="${i}"><span>${i?'右':'左'}</span><b>＋</b><span>試験に置く</span></button>`:`<div class="slot"><span>${i?'右':'左'}</span><b>・</b><span>空き</span></div>`)).join('');
+    h+=`<div class="row"><div class="rh"><span class="no" style="font-size:16px">試験台</span><span class="sub">2つで反応を見る</span></div><div><div class="craft" style="grid-template-columns:repeat(2,minmax(0,1fr));max-width:220px">${tslots}</div><div class="farinfo">反応あり→素材は手札に戻る／爆発→危険度+20%、素材はアイテム山札へ</div></div></div>`;
+    h+=`<div class="row"><div class="rh"><span class="no" style="font-size:16px">調合台</span><span class="sub">4枠そろうと<br>答え合わせ</span></div><div><div class="craft">${slots}</div></div></div>`;
+    const ansC=FILES[S.file].ans;
+    const acards=S.revealed.map((r,i)=>r?`<div class="slot filled" style="border-color:var(--sg)"><span>${i+1}番の解答</span><b>${ansC[i]}</b><span>${IT[MATNO(ansC[i])].name}</span></div>`:`<div class="slot" style="background:var(--back);color:var(--back-ink);border-style:solid;border-color:var(--back)"><span>${i+1}番の解答</span><b style="color:var(--back-ink)">？</b><span>裏向き</span></div>`).join('');
+    h+=`<div class="row"><div class="rh"><span class="no" style="font-size:16px">解答カード</span><span class="sub">1番から順にめくる</span></div><div><div class="craft">${acards}</div><div class="farinfo">違った枠で止めて失敗（危険度+${CRAFT_PEN}%、素材はすべてアイテム山札へ）。めくった解答カードは表のまま残る</div></div></div>`;
+  }
+  $('board').innerHTML=h;
+  $('stats').innerHTML=[
+    ['ゾンビ山札',`${S.zDeck.length}枚`],['倒したゾンビ',`${S.zKilled.length}枚`],
+    ['アイテム山札',`${S.iDeck.length}枚`],['捨て札',`${S.iDiscard.length}枚`],
+    ['捨て札の再利用',S.reshuffleUsed?'使用済み':'1回可'],['このエリアの撃破',`${S.kills}体`]
+  ].map(([a,b])=>`<div><span>${a}</span><b class="num">${b}</b></div>`).join('');
+}
+function cardEf(it){return it.kind==='weapon'?`攻撃 ${it.atk}・${reachLabel(it.reach)}`:it.kind==='spray'?`危険度 −${it.val}%`:it.kind==='mat'?`素材 ${it.no}`:'1列を足止め'}
+function renderAct(){
+  const p=cp();let h=`<h2>いまの手番</h2><div class="who"><span class="pchip" style="--pc:${PCOL[p]}">${pname(p)}</span><span class="small">エリア${S.area}・ターン${S.turn}・${S.cur+1}/${S.n}人目</span></div>`;
+  if(S.phase!=='action'){h+=`<p class="hint">画面の案内に沿って進めてください。</p>`;$('actPanel').innerHTML=h;return}
+  const hand=S.hands[p];const selK=selKey();
+  if(selK){
+    const it=IT[selK];
+    h+=`<p class="hint"><b>${it.name}</b>：${
+      it.kind==='weapon'?`${it.reach>=9?'どの列のゾンビも攻撃できます':`ゾンビがいる列を手前から数えて${it.reach}列目までのゾンビを攻撃できます`}。光っているゾンビを選んでください。`
+      :it.kind==='grenade'?'盤上のアプローチゾーン1〜4から「ここに閃光」を選んでください。'
+      :it.kind==='mat'?'D：調合台の空き枠か、E：試験台の空き枠を選んでください。置いたら手番は終わりです。'
+      :`危険度を${it.val}%下げます。`}</p>`;
+  }else{
+    const d=S.area===0?'／D：調合台に置く／E：試験台に置く':'';
+    h+=`<p class="hint">${S.used===0?`A：手札をタップして使う（2枚まで）／B：${S.opt.drawB}枚引く／C：パス${d}。`:`アイテムをあと${2-S.used}枚使えます。`}伏せゾンビをタップすると持ち主だけ中身を確認できます。</p>`;
+  }
+  h+=`<div class="hand">${hand.map((k,i)=>{const it=IT[k];const dis=it.kind==='mat'?(S.area!==0||S.used>0):S.used>=2;
+    return `<button class="ic${it.kind==='mat'?' mat':''}${ui.sel===i?' sel':''}" data-act="card" data-i="${i}" ${dis?'disabled':''}><b>${it.name}</b><span class="ef">${cardEf(it)}</span></button>`}).join('')||'<span class="empty">手札なし</span>'}</div>`;
+  h+=`<div class="acts">`;
+  if(selK&&IT[selK].kind==='spray')h+=`<button class="btn warn" data-act="spray">使う</button>`;
+  if(selK)h+=`<button class="btn" data-act="cancel">選び直す</button>`;
+  if(!selK&&S.used===0)h+=`<button class="btn pri" data-act="draw" ${canDraw()?'':'disabled title="アイテム山札が尽きています"'}>B：${S.opt.drawB}枚引く</button><button class="btn" data-act="end">C：パス</button>`;
+  if(!selK&&S.used>0)h+=`<button class="btn pri" data-act="end">手番を終える</button>`;
+  h+=`</div>`;
+  if(S.canEscape&&S.area!==0&&!selK)h+=`<div class="msg">${SURVIVE}ターンを生き延びたので、意思のあるゾンビを倒さずに次のエリアへ進めます。ただし${REP[S.area].no}は二度と手に入りません。<div class="acts" style="margin-top:8px"><button class="btn warn" data-act="escape">レポートを諦めて突破する</button></div></div>`;
+  if(ui.msg)h+=`<div class="msg">${ui.msg}</div>`;
+  if(S.pending.length)h+=`<div style="margin-top:12px"><span class="small">このターン伏せたゾンビ（全員の手番後にゾーン4へ）</span><div class="pend">${S.pending.map(z=>`<span class="mini"><span class="sign ${z.sign}"></span>${pname(z.owner)}</span>`).join('')}</div></div>`;
+  $('actPanel').innerHTML=h;
+}
+function renderSide(){
+  const p=cp();
+  $('players').innerHTML=S.hands.map((hd,i)=>`<div class="${i===p?'now':''}"><span class="pchip" style="--pc:${PCOL[i]}">${pname(i)}${i===S.startP?' <span class="small">（スタート）</span>':''}</span><span class="num">手札 ${hd.length}枚</span></div>`).join('');
+  $('reports').innerHTML=`<span class="filetag">研究ファイル${S.file}</span>`+[1,2,3].map(a=>{const r=S.reports.find(x=>x.a===a);
+    return r?`<div class="report"><b>${r.no}</b><span class="st">${r.story}</span>${r.text.map(t=>`・${t}`).join('<br>')}</div>`:`<div class="report locked"><b>${REP[a].no}</b>${S.skipped.includes(a)?'突破を選んだため、手に入らなかった':`エリア${a}の意思のあるゾンビを倒すと表になる`}</div>`}).join('');
+  $('log').innerHTML=S.log.slice(0,120).map(l=>`<li><span class="t">${l.t}</span>${l.m}</li>`).join('');
+}
+function renderHeader(){
+  $('hArea').textContent=`エリア${S.area}`;$('hTurn').textContent=`ターン${S.turn}`;
+  const dv=Math.min(S.danger,100);const d=$('hDanger');d.textContent=`${dv}%`;d.classList.toggle('hot',dv>=70);
+  let b='';for(let i=1;i<=10;i++)b+=`<i class="${dv>=i*10?'on':''}${i>=7?' hi':''}"></i>`;$('hBar').innerHTML=b;
+  const r=$('resetBtn');r.textContent=ui.resetArm?'もう一度押すとリセット':'最初から';r.classList.toggle('arm',ui.resetArm);
+}
+function resultCardHTML(c){
+  const rows=c.rows.map((r,i)=>`<tr class="${r.ok===false?'cur':''}"><td>${i+1}番</td><td>${IT[r.placed].name}（${IT[r.placed].no}）</td><td>${r.answer?`${IT[r.answer].name}（${IT[r.answer].no}）${r.newly?'':'・既に表'}`:'裏向きのまま'}</td><td>${r.ok===true?'○':r.ok===false?'×':'—'}</td></tr>`).join('');
+  return `<div class="tblwrap"><table class="tbl"><thead><tr><th>枠</th><th>置いた素材</th><th>解答カード</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p>${c.failAt<0?'4枚すべて一致しました。':`${c.failAt+1}番で違っていたので、ここで止めます。危険度+${CRAFT_PEN}%、調合台の素材4枚はすべてアイテム山札に混ぜ直します。めくった解答カードは表のまま残ります。`}</p>`;
+}
+function endButtons(){return `<div class="acts"><button class="btn pri" data-act="showlog">記録を見る</button><button class="btn" data-act="again">同じ設定でもう一度</button><button class="btn" data-act="setup">設定を変える</button>${S.phase==='over'?'<button class="btn" data-act="view">盤面を見る</button>':''}</div>`}
+function renderOverlay(){
+  const ov=$('ov'),d=$('dlg');let h='';
+  if(!S){
+    h=`<h3>ARUMONO テスト盤</h3><p>エリア1→2→3→0を1台の端末で回して遊ぶテスト版です。遊ぶ人数を選んでください。</p>
+    <div class="pcount">${[2,3,4,5,6].map(n=>`<button class="${n===selN?'on':''}" data-act="n" data-n="${n}" aria-label="${n}人">${n}</button>`).join('')}</div>
+    <fieldset class="opts"><legend>テスト用の設定（任意）</legend>
+      <label><input type="checkbox" id="optExtra" data-act="opt" data-k="extra" ${OPT.extra?'checked':''}><span><b>追加ゾンビ</b>：毎ターン接近の最後に、山札から1枚を表向きでゾーン4へ</span></label>
+      <div>行動Bで引く枚数<span class="seg">${[1,2].map(v=>`<button class="${OPT.drawB===v?'on':''}" data-act="drawb" data-v="${v}">${v}枚</button>`).join('')}</span></div>
+      <div>開始エリア<span class="seg">${[1,2,3,0].map(v=>`<button class="${OPT.startArea===v?'on':''}" data-act="sarea" data-v="${v}">${v}</button>`).join('')}</span></div>
+      <div>研究ファイル<span class="seg">${['R',...FKEYS].map(v=>`<button class="${OPT.file===v?'on':''}" data-act="sfile" data-v="${v}">${v==='R'?'ランダム':v}</button>`).join('')}</span></div>
+    </fieldset>
+    <p class="small">途中のエリアから始めると、それより前の研究レポートは表になった状態で始まります。研究ファイルは本番どおりランダムがおすすめです。</p>
+    <button class="btn pri" data-act="start">${selN}人で始める</button>`;
+  }else if(ui.showLog){
+    const sum=summaryRows().map(([a,b])=>`<div class="${a==='調整ルール'||a==='結果'?'full':''}"><span>${a}</span><b>${b}</b></div>`).join('');
+    const rows=S.hist.map(h=>`<tr><td>E${h.a}-T${h.t}</td><td class="${h.d>=70?'hot':''}">${h.d}%</td><td>${h.k}</td><td>${h.z}</td><td>${h.in}</td><td>${h.h}</td><td>${h.i}</td></tr>`).join('')||'<tr><td colspan="7">まだ1ターンも終わっていません</td></tr>';
+    h=`<h3>テスト記録</h3><div class="sum">${sum}</div>
+    <p class="small">「余ったダメージ」は、倒すのに必要な分を超えて与えたダメージの合計です。多いほど武器に余裕があります。</p>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>ターン</th><th>危険度</th><th>撃破(累計)</th><th>盤上</th><th>エリア内</th><th>手札合計</th><th>アイテム山札</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div><p class="small" style="margin-bottom:4px">記録全文（コピーして貼り付けると分析に使えます）</p><textarea class="exp" id="expText" readonly>${exportText().replace(/</g,'&lt;')}</textarea></div>
+    ${ui.copied?`<p class="small">${ui.copied}</p>`:''}
+    <div class="acts"><button class="btn pri" data-act="copy">記録をコピー</button><button class="btn" data-act="hidelog">閉じる</button></div>`;
+    d.className='dlg wide';d.innerHTML=h;ov.hidden=false;return;
+  }else if(ui.peek){
+    const f=findZ(ui.peek);const z=f&&f[0];
+    if(!z||!z.hidden){ui.peek=null;ov.hidden=true;return}
+    if(!ui.peekShow)h=`<h3>${pname(z.owner)}だけ見てください</h3><p>この伏せゾンビの持ち主は${pname(z.owner)}です。ほかの人は画面から目をそらしてください。</p><div class="acts"><button class="btn pri" data-act="peekshow">中身を見る</button><button class="btn" data-act="peekclose">やめる</button></div>`;
+    else{const t=ZT[z.type];h=`<h3>${pname(z.owner)}の伏せゾンビ</h3><div class="bigcard"><span class="nm">${t.name}</span><div class="row2"><span>体力 ${t.hp-z.dmg}/${t.hp}</span><span>危険度+${t.dg}%</span></div></div><p class="warnline">名前や数値は口にしないでください。</p><button class="btn pri" data-act="peekclose">隠して戻る</button>`}
+  }else if(S.phase==='handoff'){
+    const p=cp();h=`<h3><span class="pchip" style="--pc:${PCOL[p]}">${pname(p)}</span> の番です</h3><p>エリア${S.area}・ターン${S.turn}（${S.cur+1}/${S.n}人目）。端末を${pname(p)}に渡してください。</p><p class="warnline">ほかの人は画面を見ないでください。</p><div class="acts"><button class="btn pri" data-act="drawz">ゾンビを1枚引く</button><button class="btn" data-act="showlog">記録を見る</button></div>`;
+  }else if(S.phase==='peek'){
+    const t=ZT[S.drawn.type];
+    h=`<h3>引いたゾンビ</h3><div class="bigcard"><span class="nm">${t.name}</span><div class="row2"><span>体力 ${t.hp}</span><span>危険度+${t.dg}%</span></div></div><p>サインを1つ選んで伏せてください。仲間に伝えられるのはこの色だけです。</p><div class="signs">${['g','y','r'].map(s=>`<button class="sbtn" data-act="sign" data-s="${s}"><span class="sb ${s}"></span>${SIGN[s]}</button>`).join('')}</div>`;
+  }else if(S.phase==='clear'){
+    const r=S.reports.find(x=>x.a===S.area);const nx=NEXT[S.area];
+    h=`<h3>エリア${S.area} ${r?'解放！':'突破'}</h3>${r?`<div class="report"><b>${r.no}</b><span class="st">${r.story}</span>${r.text.map(t=>`・${t}`).join('<br>')}</div>`:`<div class="report locked"><b>${REP[S.area].no}</b>手に入らなかった。エリア0の推理はそのぶん難しくなります。</div>`}
+    <p>エリア${nx}の山札を作り直し、アイテムを3枚ずつ配り直します。危険度は0%に戻ります。${nx===0?'エリア0ではアイテム山札に素材カード6枚（各1枚）が混ざり、D：調合とE：試験調合が使えるようになります。':''}</p>
+    <div class="acts"><button class="btn pri" data-act="next">エリア${nx}へ進む</button><button class="btn" data-act="showlog">記録を見る</button></div>`;
+  }else if(S.phase==='test'){
+    const t=S.lastTest;const col={order:'反応あり',reverse:'反応あり',boom:'爆発'}[t.res];
+    h=`<h3>試験調合の結果</h3><div class="bigcard"><span class="nm">${col}</span><div class="row2"><span>左：${IT[t.l].name}（${IT[t.l].no}）</span><span>右：${IT[t.r].name}（${IT[t.r].no}）</span></div></div>
+    <p>${t.res==='boom'?'少なくとも一方は、ARUMONOに使わない素材です。危険度が20%上がり、2枚ともアイテム山札に混ぜ直します。':`どちらもARUMONOに使う素材です。<b>${t.res==='order'?IT[t.l].name:IT[t.r].name}</b>のほうが先に入ります。2枚とも置いた人の手札に戻ります。`}</p>
+    <button class="btn pri" data-act="testok">続ける</button>`;
+  }else if(S.phase==='craft'){
+    h=`<h3>調合の結果</h3>${resultCardHTML(S.lastCraft)}<button class="btn pri" data-act="craftok">続ける</button>`;
+  }else if(S.phase==='win'){
+    h=`<h3>ARUMONO完成。脱出成功！</h3>${resultCardHTML(S.lastCraft)}<p>合計${totalTurns()}ターンで脱出しました（調合${S.st.crafts}回）。</p>${endButtons()}`;
+  }else if(S.phase==='over'){
+    h=`<h3>脱出失敗</h3><p class="warnline">${S.overReason}</p><p>エリア${S.area}・ターン${S.turn}で失敗しました。</p>${endButtons()}`;
+  }
+  if(h){d.className=(S&&(S.phase==='craft'||S.phase==='win')&&!ui.peek)?'dlg wide':'dlg';d.innerHTML=h;ov.hidden=false}else ov.hidden=true;
+}
+function render(){
+  renderOverlay();if(!S)return;
+  renderHeader();renderBoard();renderAct();renderSide();
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
+  if(a!=='reset')ui.resetArm=false;
+  switch(a){
+    case 'n':selN=+b.dataset.n;break;
+    case 'opt':OPT[b.dataset.k]=!OPT[b.dataset.k];break;
+    case 'drawb':OPT.drawB=+b.dataset.v;break;
+    case 'sarea':OPT.startArea=+b.dataset.v;break;
+    case 'sfile':OPT.file=b.dataset.v;break;
+    case 'showlog':if(S){ui.showLog=true;ui.copied=''}break;
+    case 'hidelog':ui.showLog=false;break;
+    case 'copy':{const t=exportText();const done=m=>{ui.copied=m;render();const ta=$('expText');if(ta&&m.startsWith('自動')){ta.focus();ta.select()}};
+      try{navigator.clipboard.writeText(t).then(()=>done('コピーしました')).catch(()=>done('自動でコピーできませんでした。選択された文字をコピーしてください'))}catch(_){done('自動でコピーできませんでした。選択された文字をコピーしてください')}
+      return}
+    case 'start':startGame(selN);break;
+    case 'drawz':drawZombie();break;
+    case 'sign':chooseSign(b.dataset.s);break;
+    case 'card':{const i=+b.dataset.i;ui.sel=ui.sel===i?null:i;ui.msg='';break}
+    case 'cancel':ui.sel=null;break;
+    case 'attack':if(ui.sel!=null)attack(+b.dataset.id);break;
+    case 'grenade':if(ui.sel!=null)grenade(+b.dataset.slot);break;
+    case 'spray':if(ui.sel!=null)spray();break;
+    case 'place':if(ui.sel!=null)place(+b.dataset.slot);break;
+    case 'craftok':S.phase='action';endTurn();break;
+    case 'ptest':if(ui.sel!=null)placeTest(+b.dataset.slot);break;
+    case 'testok':S.phase='action';endTurn();break;
+    case 'escape':escapeArea();break;
+    case 'draw':drawAction();break;
+    case 'end':endTurn();break;
+    case 'peek':ui.peek=+b.dataset.id;ui.peekShow=false;break;
+    case 'peekshow':ui.peekShow=true;break;
+    case 'peekclose':ui.peek=null;ui.peekShow=false;break;
+    case 'next':setupArea(NEXT[S.area]);break;
+    case 'again':ui.showLog=false;{const n=S.n;Object.assign(OPT,S.opt);startGame(n)}break;
+    case 'setup':ui.showLog=false;selN=S.n;S=null;break;
+    case 'view':S.phase='ended';break;
+    case 'reset':if(!S)break;if(ui.resetArm){selN=S.n;S=null;ui.resetArm=false;ui.showLog=false}else ui.resetArm=true;break;
+  }
+  render();
+});
+render();
+</script>
+
+</body>
+</html>
