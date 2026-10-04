@@ -206,7 +206,7 @@ a{color:inherit}
 <div class="wrap">
   <header class="top">
     <div class="toprow">
-      <h1>ARUMONO<small>オンライン テスト版 v0.8</small></h1>
+      <h1>ARUMONO<small>オンライン テスト版 v0.9</small></h1>
       <span class="badge area" id="hArea">ロビー</span>
       <span class="badge" id="hTurn">—</span>
       <span class="badge" id="hRoom" hidden></span>
@@ -228,13 +228,14 @@ a{color:inherit}
     </section>
     <div class="side">
       <section class="panel" id="actPanel"></section>
-      <section class="panel"><h2>プレイヤー（手札は公開情報）</h2><div class="players" id="players"></div></section>
+      <section class="panel"><h2>プレイヤー</h2><div class="players" id="players"></div></section>
       <section class="panel"><h2>研究ファイル</h2><div id="reports"></div></section>
       <section class="panel"><h2>記録</h2><ul class="log" id="log"></ul></section>
       <section class="panel"><details><summary>ルールの要点</summary><ul>
         <li>1ターン：各自「ゾンビを1枚引いて伏せる → 行動を1つ」。全員が終えたらゾンビが接近する。</li>
         <li>伏せゾンビはサイン（緑=平気／黄=ふつう／赤=ヤバい）でしか伝えられない。自分の伏せゾンビの中身は自分の画面にだけ表示される。ゾーン2に来ると表になる。</li>
         <li>1人1手番の制限時間は45秒（ホストが変更可）。時間切れになると、ゾンビはサインなしで伏せられ、何もせずに手番が終わる。</li>
+        <li>手札は非公開。仲間に見せたり、カード名や効果を伝えたりしてはいけない。「結構いけそう」「何もできなさそう」のような手応えだけ伝えてよい。</li>
         <li>A：アイテムを最大2枚使う／B：アイテムを2枚引く／C：パス／D：調合台に素材を置く（エリア0）／E：試験台に素材を置く（エリア0）。</li>
         <li>武器には射程がある。ゾンビがいる列を手前（エリア内→1→2→3→4）から数えて、釘バット1列、ピストル・マグナム2列、アサルト3列、ライフルは全列。</li>
         <li>エリア内に入った瞬間と、残ったままターンを越えたときに危険度が上がる。100%で失敗。</li>
@@ -301,7 +302,7 @@ const MATNO=n=>MATS.find(m=>IT[m].no===+n);
 
 const PCOL=['#3B7DD8','#D1495B','#2A9D6F','#C98B12','#8E5CC4','#1E9AA8'];
 const SIGN={g:'平気',y:'ふつう',r:'ヤバい',n:'サインなし（時間切れ）'};
-const VERSION='オンライン版 v0.8';
+const VERSION='オンライン版 v0.9';
 const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -715,8 +716,7 @@ function renderAct(){
 function renderSide(){
   const v=V();const c=vcp();const L=N.lobby;
   $('players').innerHTML=v.hands.map((hd,i)=>{const on=L&&L.players[i]?L.players[i].on:true;
-    return `<div class="${i===c?'now':''}"><span>${chip(i)}${i===N.me?' <span class="small">（あなた）</span>':''}${i===v.startP?' <span class="small">（スタート）</span>':''}${on?'':' <span class="small" style="color:var(--blood)">切断中</span>'}</span><span class="num">手札 ${hd.length}枚</span></div>
-    <div class="phand">${hd.map(k=>IT[k].name).join('・')||'なし'}</div>`}).join('');
+    return `<div class="${i===c?'now':''}"><span>${chip(i)}${i===N.me?' <span class="small">（あなた）</span>':''}${i===v.startP?' <span class="small">（スタート）</span>':''}${on?'':' <span class="small" style="color:var(--blood)">切断中</span>'}</span><span class="num">手札 ${hd.length}枚</span></div>`}).join('');
   $('reports').innerHTML=`<span class="filetag">研究ファイル${v.file}</span>`+[1,2,3].map(a=>{const r=v.reports.find(x=>x.a===a);
     return r?`<div class="report"><b>${r.no}</b><span class="st">${r.story}</span>${r.text.map(t=>`・${t}`).join('<br>')}</div>`:`<div class="report locked"><b>${REP[a].no}</b>${v.skipped.includes(a)?'突破を選んだため、手に入らなかった':`エリア${a}の意思のあるゾンビを倒すと表になる`}</div>`}).join('');
   $('log').innerHTML=v.log.slice(0,120).map(l=>`<li><span class="t">${l.t}</span>${esc(l.m)}</li>`).join('');
