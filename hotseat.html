@@ -170,6 +170,11 @@ fieldset.opts input{margin-top:4px}
 .seg button{border:1.5px solid var(--ink);background:var(--surface);border-radius:3px;padding:2px 12px;font-weight:700}
 .seg button.on{background:var(--ink);color:var(--bg)}
 .seg{flex-wrap:wrap}
+.sign.n,.sb.n{background:#8a8f8b}
+.badge.tmr{font-family:var(--mono)}
+.badge.tmr.hot,.tmrline.hot{background:var(--blood);color:#fff;border-color:var(--blood)}
+.tmrline{display:inline-block;font-family:var(--mono);font-size:13px;padding:2px 8px;border-radius:3px;background:var(--surface2);margin-left:6px}
+
 .craft{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-width:440px}
 .slot{min-height:70px;border:1.5px dashed var(--line);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;background:var(--surface2);color:var(--muted)}
 .slot b{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink)}
@@ -189,9 +194,10 @@ button.slot{cursor:pointer;border-color:var(--hazard);color:var(--ink)}
 <div class="wrap">
   <header class="top">
     <div class="toprow">
-      <h1>ARUMONO<small>テスト盤 v0.7</small></h1>
+      <h1>ARUMONO<small>テスト盤 v0.8</small></h1>
       <span class="badge area" id="hArea">エリア1</span>
       <span class="badge" id="hTurn">ターン1</span>
+      <span class="badge tmr" id="hTimer" hidden></span>
       <div class="meter">
         <div class="lab"><span>エリア危険度</span><b id="hDanger" class="num">0%</b></div>
         <div class="bar" id="hBar"></div>
@@ -229,6 +235,7 @@ button.slot{cursor:pointer;border-color:var(--hazard);color:var(--ink)}
           <ul>
             <li>1ターン：各自「ゾンビを1枚引いて伏せる → 行動A〜Cを1つ」。全員が終えたらゾンビが接近する。</li>
             <li>伏せゾンビはサイン（緑=平気／黄=ふつう／赤=ヤバい）でしか伝えられない。アプローチゾーン2に来ると表になる。</li>
+            <li>1人1手番の制限時間は45秒（開始画面で変更可）。端末を受け取って「ゾンビを1枚引く」を押したときから数える。時間切れになると、ゾンビはサインなしで伏せられ、何もせずに手番が終わる。</li>
             <li>A：アイテムを最大2枚使う／B：アイテムを引く／C：パス。</li>
             <li>武器には射程がある。いちばん手前のゾンビがいる列（エリア内→1→2→3→4の順）から数えて、釘バット1列、ピストル・マグナム2列、アサルト3列、ライフルは全列。ゾンビがいない列は数えない。</li>
             <li>エリア内に入った瞬間と、残ったままターンを越えたときに危険度が上がる。100%で失敗。</li>
@@ -301,10 +308,10 @@ const SURVIVE=10; // このターン数を生き延びると、レポートな�
 const CRAFT_PEN=30; // 本調合に失敗したときの危険度上昇
 const MATNO=n=>MATS.find(m=>IT[m].no===+n);
 const PCOL=['#3B7DD8','#D1495B','#2A9D6F','#C98B12','#8E5CC4','#1E9AA8'];
-const SIGN={g:'平気',y:'ふつう',r:'ヤバい'};
+const SIGN={g:'平気',y:'ふつう',r:'ヤバい',n:'サインなし（時間切れ）'};
 
 let S=null, uid=0, selN=4;
-const OPT={extra:false,drawB:2,startArea:1,file:'R'};
+const OPT={extra:false,drawB:2,startArea:1,file:'R',timer:45};
 const ui={sel:null,msg:'',peek:null,peekShow:false,resetArm:false,showLog:false,copied:''};
 
 const $=id=>document.getElementById(id);
@@ -312,7 +319,7 @@ const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()
 const pname=i=>`P${i+1}`;
 const cp=()=>(S.startP+S.cur)%S.n;
 function log(t){S.log.unshift({t:`E${S.area}-T${S.turn}`,m:t})}
-function optText(o){const a=['射程ルール'];if(o.extra)a.push('追加ゾンビ');a.push(`行動B=${o.drawB}枚`);if(o.startArea!==1)a.push(`エリア${o.startArea}から開始`);return a.join('／')}
+function optText(o){const a=['射程ルール'];if(o.extra)a.push('追加ゾンビ');a.push(`行動B=${o.drawB}枚`);a.push(o.timer?`制限時間${o.timer}秒`:'制限時間なし');if(o.startArea!==1)a.push(`エリア${o.startArea}から開始`);return a.join('／')}
 function rowOf(z){if(S.inside.includes(z))return 0;for(const s of[1,2,3,4])if(S.slots[s].includes(z))return s;return -1}
 function occRows(){const r=[];if(S.inside.length)r.push(0);for(const s of[1,2,3,4])if(S.slots[s].length)r.push(s);return r}
 function reachLabel(r){return r>=9?'全列':`手前${r}列`}
@@ -504,6 +511,19 @@ function escapeArea(){
   log(`意思のあるゾンビを倒さずにエリア${S.area}を突破した。${REP[S.area].no}は手に入らなかった`);
   S.phase='clear';
 }
+function timeoutTurn(){
+  const who=pname(cp());ui.sel=null;ui.peek=null;ui.peekShow=false;
+  if(S.phase==='peek'){chooseSign('n')}
+  if(S.phase==='action'){log(`${who}は時間切れ。何もせずに手番が終わった`);endTurn();ui.msg=''}
+}
+function tick(){
+  if(!S){return}
+  const sec=S.opt.timer||0;const active=sec>0&&['peek','action'].includes(S.phase);
+  if(!active){if(S.deadline){S.deadline=null;render()}return}
+  const key=`${S.area}-${S.turn}-${S.cur}`;
+  if(S.timerKey!==key||!S.deadline){S.timerKey=key;S.deadline=Date.now()+sec*1000;return}
+  if(Date.now()>=S.deadline){timeoutTurn();render()}
+}
 function gameOver(r){S.phase='over';S.overReason=r;S.st.areaTurns[S.area]=S.turn;S.result=`失敗（${r}）`;log(`失敗：${r}`)}
 function totalTurns(){return Object.values(S.st.areaTurns).reduce((a,b)=>a+b,0)+(S.st.areaTurns[S.area]!=null?0:S.turn)}
 function areaTurnText(a){const at=S.st.areaTurns;return at[a]!=null?`${at[a]}`:(S.area===a?`${S.turn}（途中）`:'-')}
@@ -631,6 +651,7 @@ function renderOverlay(){
       <label><input type="checkbox" id="optExtra" data-act="opt" data-k="extra" ${OPT.extra?'checked':''}><span><b>追加ゾンビ</b>：毎ターン接近の最後に、山札から1枚を表向きでゾーン4へ</span></label>
       <div>行動Bで引く枚数<span class="seg">${[1,2].map(v=>`<button class="${OPT.drawB===v?'on':''}" data-act="drawb" data-v="${v}">${v}枚</button>`).join('')}</span></div>
       <div>開始エリア<span class="seg">${[1,2,3,0].map(v=>`<button class="${OPT.startArea===v?'on':''}" data-act="sarea" data-v="${v}">${v}</button>`).join('')}</span></div>
+      <div>1人1手番の制限時間<span class="seg">${[0,30,45,60].map(v=>`<button class="${(OPT.timer||0)===v?'on':''}" data-act="stimer" data-v="${v}">${v?v+'秒':'なし'}</button>`).join('')}</span></div>
       <div>研究ファイル<span class="seg">${['R',...FKEYS].map(v=>`<button class="${OPT.file===v?'on':''}" data-act="sfile" data-v="${v}">${v==='R'?'ランダム':v}</button>`).join('')}</span></div>
     </fieldset>
     <p class="small">途中のエリアから始めると、それより前の研究レポートは表になった状態で始まります。研究ファイルは本番どおりランダムがおすすめです。</p>
@@ -688,6 +709,7 @@ document.addEventListener('click',e=>{
     case 'drawb':OPT.drawB=+b.dataset.v;break;
     case 'sarea':OPT.startArea=+b.dataset.v;break;
     case 'sfile':OPT.file=b.dataset.v;break;
+    case 'stimer':OPT.timer=+b.dataset.v;break;
     case 'showlog':if(S){ui.showLog=true;ui.copied=''}break;
     case 'hidelog':ui.showLog=false;break;
     case 'copy':{const t=exportText();const done=m=>{ui.copied=m;render();const ta=$('expText');if(ta&&m.startsWith('自動')){ta.focus();ta.select()}};
@@ -719,6 +741,11 @@ document.addEventListener('click',e=>{
   }
   render();
 });
+function updateTimer(){
+  const rem=S&&S.deadline?Math.max(0,Math.ceil((S.deadline-Date.now())/1000)):null;
+  const h=$('hTimer');if(h){h.hidden=rem==null;if(rem!=null){h.textContent=`${pname(cp())} 残り${rem}秒`;h.classList.toggle('hot',rem<=10)}}
+}
+setInterval(()=>{tick();updateTimer()},250);
 render();
 </script>
 

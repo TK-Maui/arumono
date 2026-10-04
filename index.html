@@ -183,6 +183,10 @@ button.slot{cursor:pointer;border-color:var(--hazard);color:var(--ink)}
 .filetag{display:inline-block;font-family:var(--display);font-size:16px;margin-bottom:8px}
 </style>
 <style>
+.sign.n,.sb.n{background:#8a8f8b}
+.badge.tmr{font-family:var(--mono)}
+.badge.tmr.hot,.tmrline.hot{background:var(--blood);color:#fff;border-color:var(--blood)}
+.tmrline{display:inline-block;font-family:var(--mono);font-size:13px;padding:2px 8px;border-radius:3px;background:var(--surface2);margin-left:6px}
 .zc.own{box-shadow:0 0 0 2px var(--pc,var(--hazard)) inset}
 .zc .secret{font-size:10px;line-height:1.3;background:rgba(255,255,255,.12);border-radius:3px;padding:2px 4px;margin-top:2px}
 .slot.ansback{background:var(--back);color:var(--back-ink);border-style:solid;border-color:var(--back)}
@@ -202,10 +206,11 @@ a{color:inherit}
 <div class="wrap">
   <header class="top">
     <div class="toprow">
-      <h1>ARUMONO<small>オンライン テスト版 v0.7</small></h1>
+      <h1>ARUMONO<small>オンライン テスト版 v0.8</small></h1>
       <span class="badge area" id="hArea">ロビー</span>
       <span class="badge" id="hTurn">—</span>
       <span class="badge" id="hRoom" hidden></span>
+      <span class="badge tmr" id="hTimer" hidden></span>
       <div class="meter">
         <div class="lab"><span>エリア危険度</span><b id="hDanger" class="num">0%</b></div>
         <div class="bar" id="hBar"></div>
@@ -229,6 +234,7 @@ a{color:inherit}
       <section class="panel"><details><summary>ルールの要点</summary><ul>
         <li>1ターン：各自「ゾンビを1枚引いて伏せる → 行動を1つ」。全員が終えたらゾンビが接近する。</li>
         <li>伏せゾンビはサイン（緑=平気／黄=ふつう／赤=ヤバい）でしか伝えられない。自分の伏せゾンビの中身は自分の画面にだけ表示される。ゾーン2に来ると表になる。</li>
+        <li>1人1手番の制限時間は45秒（ホストが変更可）。時間切れになると、ゾンビはサインなしで伏せられ、何もせずに手番が終わる。</li>
         <li>A：アイテムを最大2枚使う／B：アイテムを2枚引く／C：パス／D：調合台に素材を置く（エリア0）／E：試験台に素材を置く（エリア0）。</li>
         <li>武器には射程がある。ゾンビがいる列を手前（エリア内→1→2→3→4）から数えて、釘バット1列、ピストル・マグナム2列、アサルト3列、ライフルは全列。</li>
         <li>エリア内に入った瞬間と、残ったままターンを越えたときに危険度が上がる。100%で失敗。</li>
@@ -294,8 +300,8 @@ const CRAFT_PEN=30; // 本調合に失敗したときの危険度上昇
 const MATNO=n=>MATS.find(m=>IT[m].no===+n);
 
 const PCOL=['#3B7DD8','#D1495B','#2A9D6F','#C98B12','#8E5CC4','#1E9AA8'];
-const SIGN={g:'平気',y:'ふつう',r:'ヤバい'};
-const VERSION='オンライン版 v0.7';
+const SIGN={g:'平気',y:'ふつう',r:'ヤバい',n:'サインなし（時間切れ）'};
+const VERSION='オンライン版 v0.8';
 const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -308,7 +314,7 @@ let G=null, uid=0;
 const cp=()=>(G.startP+G.cur)%G.n;
 const pn=i=>G.names[i]||`P${i+1}`;
 function glog(t){G.log.unshift({t:`E${G.area}-T${G.turn}`,m:t})}
-function optText(o){const a=['射程ルール'];if(o.extra)a.push('追加ゾンビ');a.push(`行動B=${o.drawB}枚`);if(o.startArea!==1)a.push(`エリア${o.startArea}から開始`);return a.join('／')}
+function optText(o){const a=['射程ルール'];if(o.extra)a.push('追加ゾンビ');a.push(`行動B=${o.drawB}枚`);a.push(o.timer?`制限時間${o.timer}秒`:'制限時間なし');if(o.startArea!==1)a.push(`エリア${o.startArea}から開始`);return a.join('／')}
 function newZ(type){return {id:++uid,type,owner:null,sign:null,hidden:type!=='boss',dmg:0,frozen:false}}
 function resetZ(z){z.owner=null;z.sign=null;z.hidden=true;z.dmg=0;z.frozen=false;return z}
 function addReport(a){if(!G.reports.some(r=>r.a===a))G.reports.push({a,...REP[a],text:FILES[G.file].r[a]})}
@@ -472,6 +478,20 @@ function escapeArea(){
   G.skipped.push(G.area);G.st.areaTurns[G.area]=G.turn;G.bossDead=true;
   glog(`${pn(cp())}の判断で、意思のあるゾンビを倒さずにエリア${G.area}を突破した。${REP[G.area].no}は手に入らなかった`);G.phase='clear';
 }
+function timeoutTurn(){
+  const who=pn(cp());
+  if(G.phase==='handoff')drawZombie();
+  if(G.phase==='peek'){chooseSign('n')}
+  if(G.phase==='action'){glog(`${who}は時間切れ。何もせずに手番が終わった`);G.msg=`${who}は時間切れ`;G.used=Math.max(G.used,0);endTurn()}
+}
+function hostTick(){
+  if(!G)return;const sec=G.opt.timer||0;
+  const active=sec>0&&['handoff','peek','action'].includes(G.phase);
+  if(!active){if(G.deadline){G.deadline=null;hostBroadcast()}return}
+  const key=`${G.area}-${G.turn}-${G.cur}`;
+  if(G.timerKey!==key||!G.deadline){G.timerKey=key;G.deadline=Date.now()+sec*1000;hostBroadcast();return}
+  if(Date.now()>=G.deadline){timeoutTurn();hostBroadcast()}
+}
 function gameOver(r){G.phase='over';G.overReason=r;G.st.areaTurns[G.area]=G.turn;G.result=`失敗（${r}）`;glog(`失敗：${r}`)}
 
 /* 行動を受け付ける（ホストだけ）。戻り値 true で状態が変わった */
@@ -531,7 +551,7 @@ function hostSave(){store.set('arumono_host_'+N.code,{lobby:N.lobby,G,uid});stor
 function hostBroadcast(){
   if(G)G.rev++;hostSave();
   N.view=G?JSON.parse(JSON.stringify(G)):null;
-  for(const[cid,c]of N.conns){const seat=N.lobby.players.findIndex(p=>p.cid===cid);try{c.send({k:'sync',lobby:pubLobby(),G,you:seat})}catch(e){}}
+  for(const[cid,c]of N.conns){const seat=N.lobby.players.findIndex(p=>p.cid===cid);try{c.send({k:'sync',lobby:pubLobby(),G,you:seat,now:Date.now()})}catch(e){}}
   render();
 }
 function pubLobby(){return {players:N.lobby.players.map(p=>({name:p.name,cid:p.cid,on:p.cid===myCid||N.conns.has(p.cid)})),opt:N.lobby.opt,started:N.lobby.started,code:N.code}}
@@ -545,7 +565,7 @@ async function hostStart(name,resumeCode){
       await new Promise((res,rej)=>{peer.on('open',()=>res());peer.on('error',e=>rej(e))});
       N.peer=peer;N.code=code;
       if(saved){N.lobby=saved.lobby;G=saved.G;uid=saved.uid||0}
-      else{N.lobby={players:[{name,cid:myCid}],opt:{extra:false,drawB:2,startArea:1,file:'R'},started:false};G=null}
+      else{N.lobby={players:[{name,cid:myCid}],opt:{extra:false,drawB:2,startArea:1,file:'R',timer:45},started:false};G=null}
       N.me=0;N.status='';
       peer.on('connection',c=>{
         c.on('data',m=>hostOnMsg(c,m));
@@ -585,7 +605,7 @@ async function joinRoom(code,name){
     const t=setTimeout(()=>{if(!c.open){N.status='部屋が見つかりませんでした。部屋番号を確かめてください';render()}},12000);
     c.on('open',()=>{clearTimeout(t);N.status='';c.send({k:'join',cid:myCid,name});render()});
     c.on('data',m=>{
-      if(m.k==='sync'){N.lobby=m.lobby;N.view=m.G;N.me=m.you;N.status='';render()}
+      if(m.k==='sync'){N.skew=(m.now||Date.now())-Date.now();N.lobby=m.lobby;N.view=m.G;N.me=m.you;N.status='';render()}
       if(m.k==='reject'){N.status=m.why;N.mode=null;render()}
     });
     c.on('close',()=>{N.status='ホストとの接続が切れました。';N.lost=true;render()});
@@ -662,7 +682,7 @@ function handHTML(hand,active){
 const PHASE_TXT={handoff:'ゾンビを引くところです',peek:'引いたゾンビを確かめて、サインを選んでいます',action:'行動を選んでいます',craft:'調合の結果を確認しています',test:'試験調合の結果を確認しています',clear:'次のエリアへ進む準備中です'};
 function renderAct(){
   const v=V();const c=vcp();const mine=isMyTurn();
-  let h=`<h2>${mine?'あなたの番です':'いまの手番'}</h2><div class="who">${chip(c)}<span class="small">エリア${v.area}・ターン${v.turn}・${v.cur+1}/${v.n}人目</span></div>`;
+  let h=`<h2>${mine?'あなたの番です':'いまの手番'}</h2><div class="who">${chip(c)}<span class="small">エリア${v.area}・ターン${v.turn}・${v.cur+1}/${v.n}人目</span><span class="tmrline" data-tmr></span></div>`;
   if(v.phase==='win'||v.phase==='over'){
     h=`<h2>ゲーム終了</h2><p class="hint">${v.phase==='win'?'ARUMONOが完成し、脱出に成功しました。':'脱出に失敗しました：'+esc(v.overReason)}</p><div class="acts"><button class="btn" data-act="showlog">記録を見る</button></div>`;
   }else if(!mine){
@@ -758,6 +778,7 @@ function lobbyHTML(){
       <label><input type="checkbox" id="optExtra" data-act="opt" data-k="extra" ${o.extra?'checked':''}><span><b>追加ゾンビ</b>：毎ターン接近の最後に、山札から1枚を表向きでゾーン4へ</span></label>
       <div>行動Bで引く枚数<span class="seg">${[1,2].map(x=>`<button class="${o.drawB===x?'on':''}" data-act="drawb" data-v="${x}">${x}枚</button>`).join('')}</span></div>
       <div>開始エリア<span class="seg">${[1,2,3,0].map(x=>`<button class="${o.startArea===x?'on':''}" data-act="sarea" data-v="${x}">${x}</button>`).join('')}</span></div>
+      <div>1人1手番の制限時間<span class="seg">${[0,30,45,60].map(x=>`<button class="${(o.timer||0)===x?'on':''}" data-act="stimer" data-v="${x}">${x?x+'秒':'なし'}</button>`).join('')}</span></div>
       <div>研究ファイル<span class="seg">${['R',...FKEYS].map(x=>`<button class="${o.file===x?'on':''}" data-act="sfile" data-v="${x}">${x==='R'?'ランダム':x}</button>`).join('')}</span></div>
     </fieldset>
     <button class="btn pri" data-act="startgame" ${L.players.length<2?'disabled':''}>${L.players.length<2?'2人以上集まると始められます':`${L.players.length}人で始める`}</button>`
@@ -820,6 +841,7 @@ document.addEventListener('click',e=>{
     case 'drawb':if(N.mode==='host'){N.lobby.opt.drawB=+b.dataset.v;hostBroadcast()}return;
     case 'sarea':if(N.mode==='host'){N.lobby.opt.startArea=+b.dataset.v;hostBroadcast()}return;
     case 'sfile':if(N.mode==='host'){N.lobby.opt.file=b.dataset.v;hostBroadcast()}return;
+    case 'stimer':if(N.mode==='host'){N.lobby.opt.timer=+b.dataset.v;hostBroadcast()}return;
     case 'startgame':case 'again':if(N.mode==='host'&&N.lobby.players.length>=2){N.lobby.started=true;newGame(N.lobby.players.map(p=>p.name),N.lobby.opt);ui.viewBoard=false;ui.showLog=false;hostBroadcast()}return;
     case 'tolobby':if(N.mode==='host'){G=null;N.lobby.started=false;ui.viewBoard=false;hostBroadcast()}return;
     case 'copylink':case 'copylog':{const t=a==='copylink'?$('inviteLink').value:exportText(V());const done=m=>{ui.copied=m;render();const el=a==='copylink'?$('inviteLink'):$('expText');if(el&&m.startsWith('自動')){el.focus();el.select()}};
@@ -850,6 +872,12 @@ window.addEventListener('beforeunload',e=>{if(N.mode==='host'&&G&&G.phase!=='win
 // 状態が変わったら選択を解除（手札の並びが変わるため）
 let lastRev=-1;const _render=render;render=function(){const v=V();if(v&&v.rev!==lastRev){lastRev=v.rev;ui.sel=null;ui.confirmEsc=false;if(v.phase!=='win'&&v.phase!=='over')ui.viewBoard=false}_render()};
 if(ui.code){const j=store.get('arumono_last_join');if(j&&j.code===ui.code&&j.name){ui.name=j.name}}
+function updateTimer(){
+  const v=V();const rem=v&&v.deadline?Math.max(0,Math.ceil((v.deadline-(Date.now()+(N.mode==='host'?0:(N.skew||0))))/1000)):null;
+  const h=$('hTimer');if(h){h.hidden=rem==null;if(rem!=null){h.textContent=`残り${rem}秒`;h.classList.toggle('hot',rem<=10)}}
+  document.querySelectorAll('[data-tmr]').forEach(el=>{el.hidden=rem==null;if(rem!=null){el.textContent=`残り${rem}秒`;el.classList.toggle('hot',rem<=10)}});
+}
+setInterval(()=>{if(N.mode==='host')hostTick();updateTimer()},250);
 render();
 
 </script>
