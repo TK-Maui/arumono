@@ -170,6 +170,7 @@ fieldset.opts input{margin-top:4px}
 .seg button{border:1.5px solid var(--ink);background:var(--surface);border-radius:3px;padding:2px 12px;font-weight:700}
 .seg button.on{background:var(--ink);color:var(--bg)}
 .seg{flex-wrap:wrap}
+.dlrow .btn{font-size:13px;padding:6px 10px}
 .sign.n,.sb.n{background:#8a8f8b}
 .badge.tmr{font-family:var(--mono)}
 .badge.tmr.hot,.tmrline.hot{background:var(--blood);color:#fff;border-color:var(--blood)}
@@ -194,7 +195,7 @@ button.slot{cursor:pointer;border-color:var(--hazard);color:var(--ink)}
 <div class="wrap">
   <header class="top">
     <div class="toprow">
-      <h1>ARUMONO<small>テスト盤 v0.9</small></h1>
+      <h1>ARUMONO<small>テスト盤 v1.0</small></h1>
       <span class="badge area" id="hArea">エリア1</span>
       <span class="badge" id="hTurn">ターン1</span>
       <span class="badge tmr" id="hTimer" hidden></span>
@@ -313,7 +314,7 @@ const SIGN={g:'平気',y:'ふつう',r:'ヤバい',n:'サインなし（時間�
 
 let S=null, uid=0, selN=4;
 const OPT={extra:false,drawB:2,startArea:1,file:'R',timer:45};
-const ui={sel:null,msg:'',peek:null,peekShow:false,resetArm:false,showLog:false,copied:''};
+const ui={saved:{},confirmClear:false,sel:null,msg:'',peek:null,peekShow:false,resetArm:false,showLog:false,copied:''};
 
 const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -332,7 +333,7 @@ function addReport(a){if(!S.reports.some(r=>r.a===a))S.reports.push({a,...REP[a]
 function startGame(n){
   const file=OPT.file==='R'?FKEYS[Math.floor(Math.random()*FKEYS.length)]:OPT.file;
   S={n,area:1,startP:0,log:[],reports:[],skipped:[],file,opt:{...OPT},hist:[],result:'プレイ中',
-     st:{kills:0,overkill:0,itemsUsed:0,itemsDrawn:0,maxDanger:0,sprayed:0,crafts:0,tests:0,areaTurns:{}}};
+     st:{kills:0,overkill:0,itemsUsed:0,itemsDrawn:0,maxDanger:0,sprayed:0,crafts:0,tests:0,timeouts:0,areaTurns:{}},gid:Date.now().toString(36),t0:Date.now(),ev:[],tStart:Date.now(),turnAct:null};
   const order=[1,2,3,0];
   for(const a of order){if(a===OPT.startArea)break;addReport(a)}
   setupArea(OPT.startArea);
@@ -350,7 +351,7 @@ function setupArea(a){
   S.slots={1:[],2:[],3:[],4:[]};S.inside=[];S.pending=[];
   S.danger=0;S.kills=0;S.bossStep=0;S.bossOn=false;S.bossDead=false;
   S.canEscape=false;S.craft=[null,null,null,null];S.test=[null,null];S.lastCraft=null;S.lastTest=null;if(a===0)S.revealed=[false,false,false,false];
-  S.used=0;S.drawn=null;S.phase='handoff';
+  S.used=0;S.drawn=null;S.phase='handoff';S.tStart=Date.now();S.turnAct=null;evPush(S,null,'area',{res:'エリア'+a});
   ui.sel=null;ui.msg='';
   log(`エリア${a}開始。ゾンビ山札${S.zDeck.length}枚、アイテム山札${S.iDeck.length}枚${a===0?'（素材6枚を含む）':''}、各自3枚配布`);
 }
@@ -362,10 +363,10 @@ function drawZombie(){
     log('ゾンビ山札が尽きたので、倒したゾンビをシャッフルして山札にした');
   }
   if(!S.zDeck.length){log('ゾンビ山札が空のため、ゾンビは引かなかった');S.phase='action';S.used=0;return}
-  S.drawn=S.zDeck.pop();S.phase='peek';
+  S.drawn=S.zDeck.pop();S.phase='peek';S.tStart=Date.now();
 }
 function chooseSign(s){
-  const z=S.drawn;z.owner=cp();z.sign=s;z.hidden=true;S.pending.push(z);S.drawn=null;
+  const z=S.drawn;z.owner=cp();z.sign=s;z.hidden=true;S.pending.push(z);S.drawn=null;evPush(S,cp(),'sign',{s,z:ZT[z.type].name});
   S.phase='action';S.used=0;ui.sel=null;ui.msg='';
   log(`${pname(cp())}がゾンビを伏せた（サイン：${SIGN[s]}）`);
 }
@@ -378,7 +379,7 @@ function attack(id){
   const f=findZ(id);if(!f)return;const[z,arr]=f;
   const k=S.hands[cp()][ui.sel];const atk=effAtk(k,z);if(atk<=0)return;discardSel();
   const t=ZT[z.type];const rem=t.hp-z.dmg;z.dmg+=atk;const dead=z.dmg>=t.hp;
-  if(dead){S.st.kills++;S.st.overkill+=atk-rem}
+  if(dead){S.st.kills++;S.st.overkill+=atk-rem}S.turnAct='A';evPush(S,cp(),'attack',{item:IT[k].name,tgt:zoneOf(S,z)+'・'+(z.hidden?nameOf(S,z.owner)+'の伏せゾンビ':t.name),z:z.hidden?t.name:'',atk,res:dead?'撃破':'残り体力'+(t.hp-z.dmg)});
   ui.msg=z.hidden
     ?`${pname(z.owner)}の伏せゾンビに${IT[k].name}（攻撃力${atk}）→ 持ち主の答え：「${dead?'倒れた！':'まだ生きている'}」`
     :`${t.name}に${IT[k].name}（攻撃力${atk}）→ ${dead?'撃破！':`残り体力${t.hp-z.dmg}`}`;
@@ -396,32 +397,32 @@ function kill(z,arr){
   }
 }
 function bossDown(){
-  S.bossDead=true;S.bossOn=false;
+  S.bossDead=true;S.bossOn=false;evPush(S,cp(),'boss');
   if(S.area===0){log('エリア0の意思のあるゾンビを倒した。脱出するにはARUMONOの調合が必要');return}
   addReport(S.area);S.st.areaTurns[S.area]=S.turn;
   log(`意思のあるゾンビを撃破！${REP[S.area].no}を表にした。エリア${S.area}解放`);
   S.phase='clear';
 }
 function grenade(slot){
-  discardSel();S.slots[slot].forEach(z=>z.frozen=true);
+  discardSel();S.slots[slot].forEach(z=>z.frozen=true);S.turnAct='A';evPush(S,cp(),'grenade',{item:'閃光グレネード',tgt:'ゾーン'+slot,res:S.slots[slot].length+'体を足止め'});
   ui.msg=`アプローチゾーン${slot}に閃光グレネード。${S.slots[slot].length}体の進行が1ターン止まる`;log(ui.msg);
   checkItemsOut();
 }
 function spray(){
   const k=S.hands[cp()][ui.sel];const v=IT[k].val;discardSel();
-  const before=S.danger;S.danger=Math.max(0,S.danger-v);S.st.sprayed+=before-S.danger;
+  const before=S.danger;S.danger=Math.max(0,S.danger-v);S.st.sprayed+=before-S.danger;S.turnAct='A';evPush(S,cp(),'spray',{item:IT[k].name,res:`${before}%→${S.danger}%`});
   ui.msg=`${IT[k].name}で危険度 ${before}% → ${S.danger}%`;log(ui.msg);
   checkItemsOut();
 }
 function place(slot){
   if(S.craft[slot])return;
-  const k=takeSel();S.craft[slot]=k;S.used=2;
+  const k=takeSel();S.craft[slot]=k;S.used=2;S.turnAct='D';evPush(S,cp(),'place',{item:IT[k].name,tgt:(slot+1)+'番'});
   log(`${pname(cp())}が調合台の${slot+1}番に「${IT[k].name}（${IT[k].no}）」を置いた`);
   if(S.craft.every(Boolean))resolveCraft();else endTurn();
 }
 function placeTest(slot){
   if(S.test[slot])return;
-  const k=takeSel();S.test[slot]={k,owner:cp()};S.used=2;
+  const k=takeSel();S.test[slot]={k,owner:cp()};S.used=2;S.turnAct='E';evPush(S,cp(),'ptest',{item:IT[k].name,tgt:slot?'右':'左'});
   log(`${pname(cp())}が試験台の${slot===0?'左':'右'}に「${IT[k].name}（${IT[k].no}）」を置いた`);
   if(S.test.every(Boolean))resolveTest();else endTurn();
 }
@@ -438,7 +439,7 @@ function resolveTest(){
   S.lastTest={l:x.k,r:y.k,res};
   const txt={order:'反応あり：どちらも使う素材。左の素材を先に入れる',reverse:'反応あり：どちらも使う素材。右の素材を先に入れる',boom:'爆発！少なくとも一方は使わない素材（危険度+20%）'}[res];
   log(`試験調合：「${IT[x.k].name}」＋「${IT[y.k].name}」→ ${txt}`);
-  S.test=[null,null];S.phase='test';
+  evPush(S,cp(),'test',{item:IT[x.k].name+'＋'+IT[y.k].name,res:{order:'反応あり（左が先）',reverse:'反応あり（右が先）',boom:'爆発'}[res]});S.test=[null,null];S.phase='test';
 }
 function resolveCraft(){
   const ans=FILES[S.file].ans;const rows=[];let failAt=-1;S.st.crafts++;
@@ -450,8 +451,8 @@ function resolveCraft(){
   }
   for(let i=rows.length;i<4;i++)rows.push({placed:S.craft[i],answer:null,ok:null,newly:false});
   S.lastCraft={rows,failAt};
-  const num=S.craft.map(k=>IT[k].no).join('');
-  if(failAt<0){log(`調合：${num} → 解答カード4枚すべて一致。ARUMONO完成！`);S.st.areaTurns[0]=S.turn;S.result='脱出成功';S.phase='win';return}
+  const num=S.craft.map(k=>IT[k].no).join('');evPush(S,cp(),'craft',{item:num,res:failAt<0?'成功':(failAt+1)+'番で不一致'});
+  if(failAt<0){log(`調合：${num} → 解答カード4枚すべて一致。ARUMONO完成！`);S.st.areaTurns[0]=S.turn;S.result='脱出成功';S.phase='win';evPush(S,cp(),'win');return}
   log(`調合：${num} → ${failAt+1}番の解答カードで不一致（正解は「${IT[MATNO(ans[failAt])].name}」）。危険度+${CRAFT_PEN}%`);
   S.danger+=CRAFT_PEN;S.craft.forEach(k=>S.iDeck.push(k));shuffle(S.iDeck);S.craft=[null,null,null,null];
   S.phase='craft';
@@ -467,7 +468,7 @@ function drawOne(){
 }
 function canDraw(){return S.iDeck.length>0||(!S.reshuffleUsed&&S.iDiscard.length>0)}
 function drawAction(){
-  let got=0;for(let i=0;i<S.opt.drawB;i++){if(!drawOne())break;got++}
+  let got=0;for(let i=0;i<S.opt.drawB;i++){if(!drawOne())break;got++}S.turnAct='B';evPush(S,cp(),'draw',{res:got+'枚'});
   log(got<S.opt.drawB?`${pname(cp())}がアイテムを${got}枚引いた（山札が尽きてこれ以上引けない）`:`${pname(cp())}がアイテムを${got}枚引いた`);
   endTurn();
 }
@@ -477,7 +478,7 @@ function checkItemsOut(){
 }
 function endTurn(){
   if(S.phase!=='action')return;
-  ui.sel=null;ui.msg='';checkItemsOut();if(S.phase!=='action')return;S.cur++;
+  ui.sel=null;ui.msg='';checkItemsOut();if(S.phase!=='action')return;evPush(S,cp(),'endturn',{act:S.turnAct||'C',sec:Math.round((Date.now()-S.tStart)/100)/10});S.tStart=Date.now();S.turnAct=null;S.cur++;
   if(S.cur<S.n)S.phase='handoff';else approach();
 }
 function approach(){
@@ -490,9 +491,9 @@ function approach(){
     if(t===0){z.hidden=false;S.inside.push(z);arr+=ZT[z.type].dg;arrN++}
     else{if(t===2&&z.hidden){z.hidden=false;rev++}ns[t].push(z)}
   }
-  if(arrN){S.danger+=arr;log(`${arrN}体がエリア内に侵入 → 危険度+${arr}%`)}
+  if(arrN){S.danger+=arr;evPush(S,null,'invade',{res:arrN+'体・危険度+'+arr+'%'});log(`${arrN}体がエリア内に侵入 → 危険度+${arr}%`)}
   if(rev)log(`アプローチゾーン2に来た伏せゾンビ${rev}体が表になった`);
-  if(S.bossStep>=5&&!S.bossOn&&!S.bossDead){ns[4].push(newZ('boss'));S.bossOn=true;log('意思のあるゾンビがアプローチゾーン4に現れた！')}
+  if(S.bossStep>=5&&!S.bossOn&&!S.bossDead){ns[4].push(newZ('boss'));S.bossOn=true;evPush(S,null,'bossin');log('意思のあるゾンビがアプローチゾーン4に現れた！')}
   S.pending.forEach(z=>ns[4].push(z));
   if(S.pending.length)log(`伏せゾンビ${S.pending.length}枚をアプローチゾーン4に配置`);
   S.slots=ns;S.pending=[];
@@ -508,14 +509,14 @@ function approach(){
 }
 function escapeArea(){
   if(!S.canEscape||S.phase!=='action')return;
-  S.skipped.push(S.area);S.st.areaTurns[S.area]=S.turn;S.bossDead=true;
+  S.skipped.push(S.area);evPush(S,cp(),'escape',{res:REP[S.area].no+'を諦めた'});S.st.areaTurns[S.area]=S.turn;S.bossDead=true;
   log(`意思のあるゾンビを倒さずにエリア${S.area}を突破した。${REP[S.area].no}は手に入らなかった`);
   S.phase='clear';
 }
 function timeoutTurn(){
   const who=pname(cp());ui.sel=null;ui.peek=null;ui.peekShow=false;
   if(S.phase==='peek'){chooseSign('n')}
-  if(S.phase==='action'){log(`${who}は時間切れ。何もせずに手番が終わった`);endTurn();ui.msg=''}
+  if(S.phase==='action'){log(`${who}は時間切れ。何もせずに手番が終わった`);S.turnAct='T';S.st.timeouts=(S.st.timeouts||0)+1;evPush(S,cp(),'timeout');endTurn();ui.msg=''}
 }
 function tick(){
   if(!S){return}
@@ -525,7 +526,7 @@ function tick(){
   if(S.timerKey!==key||!S.deadline){S.timerKey=key;S.deadline=Date.now()+sec*1000;return}
   if(Date.now()>=S.deadline){timeoutTurn();render()}
 }
-function gameOver(r){S.phase='over';S.overReason=r;S.st.areaTurns[S.area]=S.turn;S.result=`失敗（${r}）`;log(`失敗：${r}`)}
+function gameOver(r){evPush(S,null,'over',{res:r});S.phase='over';S.overReason=r;S.st.areaTurns[S.area]=S.turn;S.result=`失敗（${r}）`;log(`失敗：${r}`)}
 function totalTurns(){return Object.values(S.st.areaTurns).reduce((a,b)=>a+b,0)+(S.st.areaTurns[S.area]!=null?0:S.turn)}
 function areaTurnText(a){const at=S.st.areaTurns;return at[a]!=null?`${at[a]}`:(S.area===a?`${S.turn}（途中）`:'-')}
 function summaryRows(){
@@ -535,6 +536,87 @@ function summaryRows(){
     ['使ったアイテム',`${S.st.itemsUsed}枚`],['引いたアイテム',`${S.st.itemsDrawn}枚`],['調合した回数',`${S.st.crafts}回`],['試験調合の回数',`${S.st.tests}回`],
     ['スプレーで下げた危険度',`${S.st.sprayed}%`],['最高危険度',`${S.st.maxDanger}%`]];
 }
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =====================================================================
+   テスト記録の抽出（行動ログ・ターン推移・まとめ・プレイヤー別をCSV/JSONで保存）
+   ===================================================================== */
+const EVK={area:'エリア開始',sign:'ゾンビを伏せた',attack:'攻撃',grenade:'閃光グレネード',spray:'薬品スプレー',draw:'アイテムを引いた',place:'調合台に置いた',ptest:'試験台に置いた',test:'試験調合の結果',craft:'本調合の結果',timeout:'時間切れ',endturn:'手番終了',invade:'エリア内に侵入',bossin:'意思のあるゾンビ出現',boss:'意思のあるゾンビ撃破',escape:'レポートを諦めて突破',win:'脱出成功',over:'脱出失敗'};
+const ACTK={A:'A アイテムを使う',B:'B アイテムを引く',C:'C パス',D:'D 調合',E:'E 試験調合',T:'時間切れ'};
+function evPush(st,seat,k,d){if(!st.ev)st.ev=[];st.ev.push(Object.assign({ms:Date.now()-(st.t0||Date.now()),a:st.area,t:st.turn,p:seat,k,dg:Math.min(st.danger,100)},d||{}))}
+function nameOf(st,i){return i==null?'':(st.names&&st.names[i])||`P${i+1}`}
+function zoneOf(st,z){if(st.inside.includes(z))return 'エリア内';for(const s of[1,2,3,4])if(st.slots[s].includes(z))return 'ゾーン'+s;return ''}
+function areaTurns(st){const at=st.st.areaTurns;const f=a=>at[a]!=null?at[a]:(st.area===a&&st.phase!=='win'&&st.phase!=='over'?st.turn:'');return {1:f(1),2:f(2),3:f(3),0:f(0)}}
+function playerStats(st){
+  const P=Array.from({length:st.n},(_,i)=>({name:nameOf(st,i),turns:0,A:0,B:0,C:0,D:0,E:0,T:0,secSum:0,secMax:0,kills:0,dmg:0,items:0,signs:{g:0,y:0,r:0,n:0}}));
+  for(const e of st.ev||[]){const p=P[e.p];if(!p)continue;
+    if(e.k==='endturn'){p.turns++;p[e.act]=(p[e.act]||0)+1;p.secSum+=e.sec;p.secMax=Math.max(p.secMax,e.sec)}
+    if(e.k==='attack'){p.dmg+=e.atk;p.items++;if(e.res==='撃破')p.kills++}
+    if(e.k==='grenade'||e.k==='spray')p.items++;
+    if(e.k==='sign')p.signs[e.s]=(p.signs[e.s]||0)+1;
+  }
+  P.forEach(p=>p.secAvg=p.turns?Math.round(p.secSum/p.turns*10)/10:0);return P;
+}
+function signTable(st){
+  const T={};for(const e of st.ev||[])if(e.k==='sign'){const r=T[e.s]=T[e.s]||{};r[e.z]=(r[e.z]||0)+1}
+  return T;
+}
+function gameSummary(st){
+  const at=areaTurns(st);const P=playerStats(st);const tot=P.reduce((a,p)=>{for(const k of['turns','A','B','C','D','E','T','secSum'])a[k]=(a[k]||0)+p[k];return a},{});
+  const ev=st.ev||[];const craftFails=ev.filter(e=>e.k==='craft'&&e.res!=='成功').map(e=>e.res).join('／');
+  const end=ev.length?ev[ev.length-1].ms:0;
+  return {
+    記録ID:st.gid||'',日時:new Date(Date.now()-end).toLocaleString('ja-JP'),版:typeof VERSION!=='undefined'?VERSION:'1台回し版',人数:st.n,プレイヤー:Array.from({length:st.n},(_,i)=>nameOf(st,i)).join('・'),
+    追加ゾンビ:st.opt.extra?'あり':'なし',行動Bの枚数:st.opt.drawB,制限時間秒:st.opt.timer||0,開始エリア:st.opt.startArea,研究ファイル:st.file,
+    結果:st.phase==='win'?'脱出成功':st.phase==='over'?'脱出失敗':'途中',失敗理由:st.phase==='over'?st.overReason:'',終了時のエリア:st.area,
+    エリア1ターン数:at[1],エリア2ターン数:at[2],エリア3ターン数:at[3],エリア0ターン数:at[0],合計ターン数:[at[1],at[2],at[3],at[0]].reduce((a,b)=>a+(+b||0),0),
+    レポート入手数:st.reports.length,突破したエリア:(st.skipped||[]).join('・'),倒したゾンビ:st.st.kills,余ったダメージ:st.st.overkill,使ったアイテム:st.st.itemsUsed,引いたアイテム:st.st.itemsDrawn,
+    試験調合回数:st.st.tests,本調合回数:st.st.crafts,本調合の失敗:craftFails,スプレーで下げた危険度:st.st.sprayed,最高危険度:st.st.maxDanger,時間切れ回数:tot.T||0,
+    行動A:tot.A||0,行動B:tot.B||0,行動C:tot.C||0,行動D:tot.D||0,行動E:tot.E||0,平均の手番秒数:tot.turns?Math.round(tot.secSum/tot.turns*10)/10:0,プレイ時間分:Math.round(end/6000)/10
+  };
+}
+const csvQ=x=>{const t=x===null||x===undefined?'':String(x);return /[",\n\r]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
+function toCSV(head,rows){return '﻿'+[head.map(csvQ).join(','),...rows.map(r=>r.map(csvQ).join(','))].join('\r\n')}
+function csvSummary(list){const head=Object.keys(gameSummary({n:0,opt:{},st:{areaTurns:{}},reports:[],ev:[],slots:{},inside:[]}));return toCSV(head,list.map(o=>head.map(h=>o[h])))}
+function csvTurns(st){return toCSV(['記録ID','エリア','ターン','ターン終了時の危険度%','このエリアの撃破数(累計)','盤上のゾンビ','エリア内のゾンビ','手札の合計','アイテム山札'],(st.hist||[]).map(h=>[st.gid,h.a,h.t,h.d,h.k,h.z,h.in,h.h,h.i]))}
+function csvEvents(st){return toCSV(['記録ID','経過秒','エリア','ターン','プレイヤー','種類','行動','アイテム・素材','対象','サイン','伏せたゾンビ','攻撃力','結果','その時点の危険度%','手番にかけた秒数'],
+  (st.ev||[]).map(e=>[st.gid,Math.round(e.ms/100)/10,e.a,e.t,nameOf(st,e.p),EVK[e.k]||e.k,e.act?ACTK[e.act]:'',e.item||'',e.tgt||'',e.s?SIGN[e.s]:'',e.z||'',e.atk??'',e.res||'',e.dg,e.sec??'']))}
+function csvPlayers(st){return toCSV(['記録ID','プレイヤー','手番数','A アイテムを使う','B アイテムを引く','C パス','D 調合','E 試験調合','時間切れ','平均の手番秒数','最長の手番秒数','撃破数','与えたダメージ','使ったアイテム','サイン緑','サイン黄','サイン赤','サインなし'],
+  playerStats(st).map(p=>[st.gid,p.name,p.turns,p.A,p.B,p.C,p.D,p.E,p.T,p.secAvg,p.secMax,p.kills,p.dmg,p.items,p.signs.g,p.signs.y,p.signs.r,p.signs.n]))}
+function recList(){return store.get('arumono_records')||[]}
+function saveRecord(st){if(!st||!st.gid)return;const l=recList();const s=gameSummary(st);const i=l.findIndex(r=>r.記録ID===st.gid);if(i>=0)l[i]=s;else l.push(s);store.set('arumono_records',l)}
+function stamp(){const d=new Date(),z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`}
+function downloadFile(name,text,type){try{const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);return true}catch(e){return false}}
+function exportKind(st,kind){
+  const f=`arumono_${stamp()}`;
+  if(kind==='sum')return downloadFile(`${f}_summary.csv`,csvSummary([gameSummary(st)]),'text/csv');
+  if(kind==='all')return downloadFile(`arumono_history_${stamp()}.csv`,csvSummary(recList()),'text/csv');
+  if(kind==='turn')return downloadFile(`${f}_turns.csv`,csvTurns(st),'text/csv');
+  if(kind==='ev')return downloadFile(`${f}_actions.csv`,csvEvents(st),'text/csv');
+  if(kind==='pl')return downloadFile(`${f}_players.csv`,csvPlayers(st),'text/csv');
+  if(kind==='json')return downloadFile(`${f}_alldata.json`,JSON.stringify({summary:gameSummary(st),players:playerStats(st),signs:signTable(st),opt:st.opt,file:st.file,events:st.ev,turns:st.hist,log:[...st.log].reverse(),state:st},null,1),'application/json');
+}
+function analyticsHTML(st){
+  const P=playerStats(st);const S2=signTable(st);const zs=['ノーマルゾンビ','デカゾンビ','汚染ゾンビ','異形ゾンビ'];
+  const pt=`<div class="tblwrap"><table class="tbl"><thead><tr><th>プレイヤー</th><th>手番</th><th>A使う</th><th>B引く</th><th>Cパス</th><th>D調合</th><th>E試験</th><th>時間切れ</th><th>平均秒</th><th>最長秒</th><th>撃破</th><th>与ダメ</th></tr></thead><tbody>${P.map(p=>`<tr><td>${esc(p.name)}</td><td>${p.turns}</td><td>${p.A}</td><td>${p.B}</td><td>${p.C}</td><td>${p.D}</td><td>${p.E}</td><td class="${p.T?'hot':''}">${p.T}</td><td>${p.secAvg}</td><td>${p.secMax}</td><td>${p.kills}</td><td>${p.dmg}</td></tr>`).join('')}</tbody></table></div>`;
+  const st2=`<div class="tblwrap"><table class="tbl"><thead><tr><th>サイン</th>${zs.map(z=>`<th>${z.replace('ゾンビ','')}</th>`).join('')}<th>計</th></tr></thead><tbody>${['g','y','r','n'].filter(s=>S2[s]).map(s=>{const r=S2[s];const tot=Object.values(r).reduce((a,b)=>a+b,0);return `<tr><td>${SIGN[s]}</td>${zs.map(z=>`<td>${r[z]||0}</td>`).join('')}<td>${tot}</td></tr>`}).join('')||'<tr><td colspan="6">まだゾンビを伏せていません</td></tr>'}</tbody></table></div>`;
+  const n=recList().length;
+  return `<h3 style="font-size:16px">プレイヤー別</h3>${pt}
+  <h3 style="font-size:16px">サインと実際に伏せたゾンビ</h3><p class="small">どの色のサインのときに、実際にはどのゾンビだったかの回数です。サインの使われ方の分析に使えます。</p>${st2}
+  <h3 style="font-size:16px">ファイルで保存</h3>
+  <p class="small">CSVはExcelやGoogleスプレッドシートでそのまま開けます。「これまでのまとめ」には、この端末で最後まで遊んだゲームが1ゲーム1行で入ります（今${n}件）。</p>
+  <div class="acts dlrow">
+    <button class="btn" data-act="dl" data-k="sum">このゲームのまとめ（CSV）</button>
+    <button class="btn" data-act="dl" data-k="turn">ターン推移（CSV）</button>
+    <button class="btn" data-act="dl" data-k="ev">行動ログ（CSV）</button>
+    <button class="btn" data-act="dl" data-k="pl">プレイヤー別（CSV）</button>
+    <button class="btn" data-act="dl" data-k="json">全データ（JSON）</button>
+    <button class="btn" data-act="dl" data-k="all" ${n?'':'disabled'}>これまでのまとめ（CSV・${n}件）</button>
+  </div>
+  <div class="acts">${ui.confirmClear?`<button class="btn warn" data-act="clearrec">本当にこの端末の記録を消す</button><button class="btn" data-act="noclear">やめる</button>`:`<button class="btn" data-act="askclear" ${n?'':'disabled'}>この端末の「これまでのまとめ」を消す</button>`}</div>`;
+}
+
 function exportText(){
   const L=['ARUMONO テスト記録'];
   summaryRows().forEach(([a,b])=>L.push(`${a}: ${b}`));
@@ -663,6 +745,7 @@ function renderOverlay(){
     h=`<h3>テスト記録</h3><div class="sum">${sum}</div>
     <p class="small">「余ったダメージ」は、倒すのに必要な分を超えて与えたダメージの合計です。多いほど武器に余裕があります。</p>
     <div class="tblwrap"><table class="tbl"><thead><tr><th>ターン</th><th>危険度</th><th>撃破(累計)</th><th>盤上</th><th>エリア内</th><th>手札合計</th><th>アイテム山札</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${analyticsHTML(S)}
     <div><p class="small" style="margin-bottom:4px">記録全文（コピーして貼り付けると分析に使えます）</p><textarea class="exp" id="expText" readonly>${exportText().replace(/</g,'&lt;')}</textarea></div>
     ${ui.copied?`<p class="small">${ui.copied}</p>`:''}
     <div class="acts"><button class="btn pri" data-act="copy">記録をコピー</button><button class="btn" data-act="hidelog">閉じる</button></div>`;
@@ -697,6 +780,7 @@ function renderOverlay(){
   if(h){d.className=(S&&(S.phase==='craft'||S.phase==='win')&&!ui.peek)?'dlg wide':'dlg';d.innerHTML=h;ov.hidden=false}else ov.hidden=true;
 }
 function render(){
+  if(S&&(S.phase==='win'||S.phase==='over')&&S.gid&&!ui.saved[S.gid]){ui.saved[S.gid]=1;saveRecord(S)}
   renderOverlay();if(!S)return;
   renderHeader();renderBoard();renderAct();renderSide();
 }
@@ -713,6 +797,10 @@ document.addEventListener('click',e=>{
     case 'stimer':OPT.timer=+b.dataset.v;break;
     case 'showlog':if(S){ui.showLog=true;ui.copied=''}break;
     case 'hidelog':ui.showLog=false;break;
+    case 'dl':{const st=S;if(st&&!exportKind(st,b.dataset.k))ui.copied='ファイルを保存できませんでした。「記録をコピー」を使ってください';break}
+    case 'askclear':ui.confirmClear=true;break;
+    case 'noclear':ui.confirmClear=false;break;
+    case 'clearrec':store.del('arumono_records');ui.confirmClear=false;break;
     case 'copy':{const t=exportText();const done=m=>{ui.copied=m;render();const ta=$('expText');if(ta&&m.startsWith('自動')){ta.focus();ta.select()}};
       try{navigator.clipboard.writeText(t).then(()=>done('コピーしました')).catch(()=>done('自動でコピーできませんでした。選択された文字をコピーしてください'))}catch(_){done('自動でコピーできませんでした。選択された文字をコピーしてください')}
       return}
