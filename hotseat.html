@@ -738,6 +738,7 @@ function renderOverlay(){
       <div>研究ファイル<span class="seg">${['R',...FKEYS].map(v=>`<button class="${OPT.file===v?'on':''}" data-act="sfile" data-v="${v}">${v==='R'?'ランダム':v}</button>`).join('')}</span></div>
     </fieldset>
     <p class="small">途中のエリアから始めると、それより前の研究レポートは表になった状態で始まります。研究ファイルは本番どおりランダムがおすすめです。</p>
+    <p class="small">新しいルール案は <a href="facility.html">施設ルール（テスト版）</a> で遊べます。</p>
     <button class="btn pri" data-act="start">${selN}人で始める</button>`;
   }else if(ui.showLog){
     const sum=summaryRows().map(([a,b])=>`<div class="${a==='調整ルール'||a==='結果'?'full':''}"><span>${a}</span><b>${b}</b></div>`).join('');

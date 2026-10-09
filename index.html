@@ -843,7 +843,7 @@ function lobbyHTML(){
       ${lastHost&&store.get('arumono_host_'+lastHost)?`<button class="btn" data-act="resume" style="margin-top:6px">前回の部屋（${lastHost}）を再開</button>`:''}</div>
       <div class="box"><b>部屋に参加する</b><label class="fld">部屋番号<input id="inCode" maxlength="4" value="${esc(ui.code)}" placeholder="例：K7QM" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.2em"></label><button class="btn pri" data-act="join">参加する</button></div>
     </div>
-    <p class="small">1台を回して遊ぶ場合は <a href="hotseat.html">1台回し版</a> をどうぞ。</p>`;
+    <p class="small">1台を回して遊ぶ場合は <a href="hotseat.html">1台回し版</a> をどうぞ。新しいルール案は <a href="facility.html">施設ルール（テスト版）</a> で遊べます。</p>`;
   }
   const L=N.lobby;const host=N.mode==='host';
   const link=location.origin+location.pathname+'?room='+N.code;

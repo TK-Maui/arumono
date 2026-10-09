@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ARUMONO 施設ルール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Dela+Gothic+One&family=Share+Tech+Mono&display=swap">
+<style>
+:root{
+  --bg:#E4E7E0;--surface:#F2F4EE;--surface2:#E8EBE4;--ink:#1C221F;--muted:#5B665F;--line:#C3C9BE;
+  --hazard:#C99700;--hazard-ink:#1C1A10;--blood:#B3261E;
+  --sg:#2E8B57;--sy:#C99700;--sr:#C62828;
+  --back:#2B332E;--back-ink:#DDE3DA;--shade:rgba(20,26,22,.62);
+  --display:"Dela Gothic One","BIZ UDPGothic",system-ui,sans-serif;
+  --body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --mono:"Share Tech Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#131815;--surface:#1C231F;--surface2:#232B26;--ink:#E3E8E0;--muted:#94A096;--line:#343F38;
+  --hazard:#E5B82A;--hazard-ink:#15130A;--blood:#EF5A50;--sg:#3FB373;--sy:#E5B82A;--sr:#EF5350;
+  --back:#3A453E;--back-ink:#E3E8E0;--shade:rgba(0,0,0,.7);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131815;--surface:#1C231F;--surface2:#232B26;--ink:#E3E8E0;--muted:#94A096;--line:#343F38;
+  --hazard:#E5B82A;--hazard-ink:#15130A;--blood:#EF5A50;--sg:#3FB373;--sy:#E5B82A;--sr:#EF5350;
+  --back:#3A453E;--back-ink:#E3E8E0;--shade:rgba(0,0,0,.7);color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:0 40px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--hazard);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 0;margin-inline:-16px;padding-inline:16px}
+.tape{height:8px;background:repeating-linear-gradient(-45deg,var(--hazard) 0 12px,var(--hazard-ink) 12px 24px);margin-inline:-16px;margin-top:10px}
+.toprow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+h1{font-family:var(--display);font-weight:400;font-size:22px;margin:0;letter-spacing:.02em}
+h1 small{font-family:var(--body);font-size:12px;color:var(--muted);margin-left:8px;letter-spacing:.08em}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1.5px solid var(--ink);border-radius:3px;font-weight:700;font-size:13px}
+.badge.area{background:var(--ink);color:var(--bg)}
+.meter{flex:1 1 260px;min-width:0}
+.meter .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.meter .lab b{font-family:var(--mono);font-size:20px;color:var(--ink);letter-spacing:0}
+.meter .lab b.hot{color:var(--blood)}
+.bar{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:2px}
+.bar i{height:12px;background:var(--surface2);border:1px solid var(--line)}
+.bar i.on{background:var(--sy);border-color:var(--sy)}
+.bar i.on.hi{background:var(--blood);border-color:var(--blood)}
+.resetbtn{background:none;border:1px solid var(--line);border-radius:3px;padding:4px 10px;font-size:12px;color:var(--muted)}
+.resetbtn.arm{border-color:var(--blood);color:var(--blood)}
+
+/* layout */
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;margin-top:18px;align-items:start}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+section.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px}
+.side{display:flex;flex-direction:column;gap:16px}
+h2{font-size:12px;letter-spacing:.14em;color:var(--muted);margin:0 0 10px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px 14px;font-size:13px;margin-bottom:12px}
+.stats div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:2px}
+.stats span{color:var(--muted)}
+
+/* board rows */
+.board{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px;align-items:stretch;border-top:1px solid var(--line);padding-top:8px}
+.row .rh{display:flex;flex-direction:column;gap:4px;justify-content:center}
+.row .rh .no{font-family:var(--display);font-size:26px;line-height:1}
+.row .rh .sub{font-size:11px;color:var(--muted);line-height:1.3}
+.row.inside .rh .no{color:var(--blood);font-size:18px}
+.row.inside{background:repeating-linear-gradient(-45deg,transparent 0 10px,color-mix(in srgb,var(--blood) 7%,transparent) 10px 20px);border-radius:3px}
+.cells{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;align-items:flex-start;padding-bottom:4px}
+.empty{font-size:12px;color:var(--muted);align-self:center}
+.gbtn{border:1.5px dashed var(--hazard);background:none;border-radius:3px;font-size:12px;padding:4px 8px;margin-top:4px}
+
+/* far track */
+.far{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:420px}
+.far i{height:40px;border:1px solid var(--line);border-radius:3px;display:grid;place-items:center;font-style:normal;font-size:11px;color:var(--muted);background:var(--surface2)}
+.far i.boss{background:var(--blood);color:#fff;border-color:var(--blood);font-weight:700}
+.farinfo{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* zombie card */
+.zc{width:86px;min-height:92px;border-radius:4px;border:1.5px solid var(--line);background:var(--surface);padding:6px;display:flex;flex-direction:column;gap:3px;text-align:left;position:relative;font-size:11px;line-height:1.3}
+.zc.back{background:var(--back);color:var(--back-ink);border-color:var(--back)}
+.zc .q{font-family:var(--display);font-size:22px;line-height:1;opacity:.8}
+.zc .own{font-weight:700;font-size:11px;border-left:4px solid var(--pc);padding-left:4px}
+.zc .nm{font-weight:700;font-size:12px}
+.zc .hp{font-family:var(--mono);font-size:14px}
+.zc .dg{color:var(--blood)}
+.zc.bossc{border-color:var(--blood);border-width:2px;width:110px}
+.zc.target{outline:2.5px solid var(--hazard);outline-offset:1px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{outline-color:transparent}}
+@media (prefers-reduced-motion:reduce){.zc.target{animation:none}}
+.sign{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;border:2px solid var(--back-ink)}
+.sign.g,.sb.g{background:var(--sg)}.sign.y,.sb.y{background:var(--sy)}.sign.r,.sb.r{background:var(--sr)}
+.dots{display:flex;gap:2px;flex-wrap:wrap;margin-top:auto}
+.dots b{width:8px;height:8px;border-radius:50%;background:var(--blood)}
+.frz{font-size:10px;background:var(--hazard);color:var(--hazard-ink);padding:0 4px;border-radius:2px;align-self:flex-start;font-weight:700}
+
+/* action panel */
+.who{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pchip{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.pchip::before{content:"";width:12px;height:12px;border-radius:2px;background:var(--pc)}
+.hint{font-size:13px;color:var(--muted);margin:0 0 10px}
+.hand{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ic{width:96px;min-height:74px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface2);padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:2px;font-size:12px;line-height:1.3}
+.ic b{font-size:13px}
+.ic .ef{font-family:var(--mono);font-size:15px;margin-top:auto}
+.ic.sel{border-color:var(--hazard);background:color-mix(in srgb,var(--hazard) 18%,var(--surface2));box-shadow:0 0 0 2px var(--hazard)}
+.ic:disabled{opacity:.45;cursor:not-allowed}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1.5px solid var(--ink);background:var(--surface);border-radius:3px;padding:8px 14px;font-weight:700;font-size:14px}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn.warn{border-color:var(--hazard);background:var(--hazard);color:var(--hazard-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.msg{margin-top:10px;font-size:13px;padding:8px 10px;border-left:4px solid var(--hazard);background:var(--surface2)}
+.pend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mini{width:40px;height:54px;border-radius:3px;background:var(--back);position:relative;display:grid;place-items:end center;color:var(--back-ink);font-size:10px;padding-bottom:3px}
+.mini .sign{top:4px;right:4px;width:12px;height:12px}
+
+.players{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.players div{display:flex;justify-content:space-between;padding:4px 6px;border-radius:3px}
+.players div.now{background:var(--surface2);font-weight:700}
+.report{border:1px solid var(--line);border-radius:3px;padding:8px 10px;background:var(--surface2);font-size:13px;margin-bottom:6px}
+.report b{font-family:var(--display);font-weight:400;margin-right:6px}
+.log{max-height:260px;overflow:auto;font-size:12px;display:flex;flex-direction:column;gap:3px;margin:0;padding:0;list-style:none}
+.log li{border-bottom:1px dashed var(--line);padding-bottom:3px}
+.log li .t{color:var(--muted);font-family:var(--mono);margin-right:6px}
+details{font-size:13px}
+details summary{cursor:pointer;font-weight:700}
+details ul{padding-left:18px;margin:8px 0 0}
+
+/* overlay */
+.ov{position:fixed;inset:0;z-index:20;background:var(--shade);display:grid;place-items:center;padding:16px;overflow:auto}
+.dlg{background:var(--surface);border:1px solid var(--line);border-top:8px solid var(--hazard);border-radius:4px;max-width:440px;width:100%;padding:22px 20px;display:flex;flex-direction:column;gap:14px}
+.dlg h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0;text-wrap:balance}
+.dlg p{margin:0}
+.dlg .warnline{font-size:13px;color:var(--blood);font-weight:700}
+.bigcard{border:2px solid var(--ink);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--surface2)}
+.bigcard .nm{font-family:var(--display);font-size:22px}
+.bigcard .row2{display:flex;gap:16px;font-family:var(--mono);font-size:16px}
+.signs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sbtn{border:2px solid var(--line);border-radius:4px;background:var(--surface);padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700}
+.sb{width:26px;height:26px;border-radius:50%;display:block}
+.pcount{display:flex;gap:8px;flex-wrap:wrap}
+.pcount button{width:48px;height:48px;border:1.5px solid var(--ink);border-radius:4px;background:var(--surface);font-family:var(--display);font-size:20px}
+.pcount button.on{background:var(--ink);color:var(--bg)}
+.small{font-size:12px;color:var(--muted)}
+.dlg.wide{max-width:800px}
+.tblwrap{overflow-x:auto;max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:3px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{position:sticky;top:0;background:var(--surface2);font-weight:700;color:var(--muted)}
+.tbl td.hot{color:var(--blood);font-weight:700}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:4px 16px;font-size:13px}
+.sum div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line)}
+.sum span{color:var(--muted)}
+.sum div.full{grid-column:1/-1}
+textarea.exp{width:100%;height:140px;font-family:var(--mono);font-size:12px;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:8px}
+fieldset.opts{border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+fieldset.opts legend{font-weight:700;padding:0 4px}
+fieldset.opts label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+fieldset.opts input{margin-top:4px}
+.seg{display:inline-flex;gap:4px;margin-left:6px}
+.seg button{border:1.5px solid var(--ink);background:var(--surface);border-radius:3px;padding:2px 12px;font-weight:700}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.seg{flex-wrap:wrap}
+.dlrow .btn{font-size:13px;padding:6px 10px}
+.craft{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-width:440px}
+.slot{min-height:70px;border:1.5px dashed var(--line);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;background:var(--surface2);color:var(--muted)}
+.slot b{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink)}
+.slot.filled{border-style:solid;border-color:var(--ink);color:var(--ink);background:var(--surface)}
+button.slot{cursor:pointer;border-color:var(--hazard);color:var(--ink)}
+.ic.mat{background:color-mix(in srgb,var(--sg) 14%,var(--surface2))}
+.tbl tr.cur td{background:color-mix(in srgb,var(--hazard) 22%,transparent);font-weight:700}
+.rescard{border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+.rescard .num{display:block;font-family:var(--mono);font-size:30px;text-align:center;padding:8px;background:var(--back);color:var(--back-ink);letter-spacing:.2em}
+.report .st{display:block;font-size:12px;color:var(--muted)}
+.report.locked{color:var(--muted);background:none;border-style:dashed}
+.filetag{display:inline-block;font-family:var(--display);font-size:16px;margin-bottom:8px}
+
+.sign.n,.sb.n{background:#8a8f8b}
+.badge.tmr{font-family:var(--mono)}
+.badge.tmr.hot,.tmrline.hot{background:var(--blood);color:#fff;border-color:var(--blood)}
+.tmrline{display:inline-block;font-family:var(--mono);font-size:13px;padding:2px 8px;border-radius:3px;background:var(--surface2);margin-left:6px}
+.zc.own{box-shadow:0 0 0 2px var(--pc,var(--hazard)) inset}
+.zc .secret{font-size:10px;line-height:1.3;background:rgba(255,255,255,.12);border-radius:3px;padding:2px 4px;margin-top:2px}
+.slot.ansback{background:var(--back);color:var(--back-ink);border-style:solid;border-color:var(--back)}
+.slot.ansback b{color:var(--back-ink)}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700}
+.fld input,.copyrow input{font:inherit;font-size:16px;padding:8px 10px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface2);color:var(--ink);min-width:0}
+.twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.box{border:1px solid var(--line);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.roomcode{font-family:var(--mono);font-size:44px;letter-spacing:.3em;text-align:center;padding:6px;border:2px dashed var(--hazard);border-radius:6px}
+.copyrow{display:flex;gap:8px}.copyrow input{flex:1;font-size:13px}
+.phand{font-size:11px;color:var(--muted);padding:0 6px 4px 26px}
+#hRoom{font-family:var(--mono)}
+a{color:inherit}
+.labbar{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;max-width:420px}
+.labbar i{height:22px;border:1px solid var(--line);background:var(--surface2);border-radius:2px}
+.labbar i.on{background:var(--sg);border-color:var(--sg)}
+.facs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.fac{border:1.5px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--surface2);display:flex;flex-direction:column;gap:4px;font-size:12px}
+.fac b{font-family:var(--display);font-weight:400;font-size:17px}
+.fac .cap{font-size:11px;color:var(--muted)}
+.fac p{margin:0;color:var(--muted);line-height:1.4}
+.fres{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;border-top:1px dashed var(--line);padding-top:4px}
+.die{display:inline-grid;place-items:center;width:20px;height:20px;border:1.5px solid var(--ink);border-radius:4px;font-family:var(--mono);margin-right:4px}
+.pickgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.pickbtn{border:2px solid var(--ink);border-radius:6px;background:var(--surface);padding:12px 10px;display:flex;flex-direction:column;gap:4px;text-align:left}
+.pickbtn b{font-family:var(--display);font-weight:400;font-size:20px}
+.pickbtn span{font-size:12px;color:var(--muted)}
+.pickbtn:hover{background:var(--surface2)}
+.ammo{display:flex;align-items:baseline;gap:6px;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.ammo b{font-size:24px;color:var(--ink)}
+.seq{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}
+.zc .zmat{font-size:10px;font-weight:700;background:var(--sg);color:#fff;padding:0 4px;border-radius:2px;align-self:flex-start}
+.bigcard.boss{border-color:var(--blood)}
+.who{flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="toprow">
+      <h1>ARUMONO<small>施設ルール テスト版 v0.1</small></h1>
+      <span class="badge area" id="hArea">ロビー</span>
+      <span class="badge" id="hTurn">—</span>
+      <span class="badge" id="hRoom" hidden></span>
+      <span class="badge tmr" id="hTimer" hidden></span>
+      <div class="meter">
+        <div class="lab"><span>エリア危険度</span><b id="hDanger" class="num">0%</b></div>
+        <div class="bar" id="hBar"></div>
+      </div>
+      <button class="resetbtn" data-act="showlog">記録</button>
+      <button class="resetbtn" id="resetBtn" data-act="reset" hidden>最初から</button>
+    </div>
+    <div class="tape"></div>
+  </header>
+  <div id="gameArea" hidden>
+  <main>
+    <section class="panel">
+      <h2>ゾンビ状況盤</h2>
+      <div class="stats" id="stats"></div>
+      <div class="board" id="board"></div>
+    </section>
+    <div class="side">
+      <section class="panel" id="actPanel"></section>
+      <section class="panel"><h2>共有アイテム（全員で使える）</h2><div id="pool"></div></section>
+      <section class="panel"><h2>施設</h2><div id="facs"></div></section>
+      <section class="panel"><h2>プレイヤー</h2><div class="players" id="players"></div></section>
+      <section class="panel"><h2>研究ファイル</h2><div id="reports"></div></section>
+      <section class="panel"><h2>記録</h2><ul class="log" id="log"></ul></section>
+      <section class="panel"><details><summary>施設ルールの要点</summary><ul>
+        <li>1ラウンドの流れ：① 全員がゾンビを1枚ずつ引いてサインを付けて伏せる → ② 全員が伏せたまま行き先を選び、一斉に公開（相談禁止） → ③ 施設の結果を受け取る → ④ スタートプレイヤーから順に共有アイテムを使う。スタートプレイヤーは毎ラウンド時計回りに交代。</li>
+        <li>武器庫・弾薬庫・薬品庫は1ラウンド2人まで。3人目以降はサイコロを振れない（スタートプレイヤーに近い順）。武器庫：1閃光グレネード 2釘バット 3ピストル 4アサルト 5ライフル 6マグナム。弾薬庫：1-2→1発、3-4→2発、5-6→3発。薬品庫：スプレー小（6なら大）。</li>
+        <li>研究所：解読が1段階進む。何人入っても1ラウンドに1段階だけ。研究所に行った人はそのラウンド、アイテムを使えない。研究レポートは、エリアの意思のあるゾンビ（ゾンビ山札に1枚）を倒すと手に入り、解読が終わると次のエリアへ進める。必要なラウンドはエリア1が5、2が7、3が10。</li>
+        <li>意思のあるゾンビを倒したあとなら、解読を諦めてすぐ次のエリアへ進むこともできる（そのレポートは読めない）。</li>
+        <li>手に入れたアイテムは全員の共有。使ったアイテムは捨て札。銃は撃つたびに弾を使う（マグナムは2発、ほかの銃は1発、釘バットは不要）。</li>
+        <li>射程：ゾンビがいる列を手前（エリア内→1→2→3→4）から数えて、釘バット1列、ピストル・マグナム2列、アサルト3列、ライフルは全列。</li>
+        <li>ゾンビは各ラウンドの最初に1列進む。前のラウンドに伏せたゾンビはこのときゾーン4に入る。エリア内に入った瞬間と、残ったままラウンドを越えたときに危険度が上がる。危険度は100%で止まり、<b>100%のままラウンドを終えると失敗</b>。</li>
+        <li>エリア0：ゾンビはそれぞれ素材（1〜6番）を持っていて、倒すとその素材が共有アイテムに加わる（すでにあれば何もなし）。研究所は調合室になり、入った1人が試験調合か本調合をする。失った素材は同じ番号のゾンビを倒せばまた手に入る。</li>
+      </ul></details></section>
+    </div>
+  </main>
+  </div>
+</div>
+<div class="ov" id="ov" hidden><div class="dlg" id="dlg"></div></div>
+
+<script>
+/* =====================================================================
+   ARUMONO 施設ルール：データとエンジン（ホストだけが状態 G を書き換える）
+   ===================================================================== */
+const ZT={
+  normal:{name:'ノーマルゾンビ',hp:1,dg:5},
+  big:{name:'デカゾンビ',hp:3,dg:10},
+  toxic:{name:'汚染ゾンビ',hp:2,dg:30},
+  mutant:{name:'異形ゾンビ',hp:5,dg:20},
+  boss:{name:'意思のあるゾンビ',hp:12,dg:50}
+};
+const NEXT={1:2,2:3,3:0};
+const ZDECK={1:{normal:4,big:1},2:{normal:3,big:1,toxic:1},3:{normal:2,big:1,toxic:1,mutant:1},0:{normal:1,big:2,toxic:1,mutant:1}};
+const IT={
+  bat:{name:'釘バット',kind:'weapon',atk:1,reach:1,ammo:0},
+  pistol:{name:'ピストル銃',kind:'weapon',atk:2,reach:2,ammo:1},
+  assault:{name:'アサルト銃',kind:'weapon',atk:3,reach:3,ammo:1},
+  rifle:{name:'ライフル銃',kind:'weapon',atk:4,reach:9,ammo:1},
+  magnum:{name:'マグナム銃',kind:'weapon',atk:5,reach:2,ammo:2},
+  grenade:{name:'閃光グレネード',kind:'grenade'},
+  sprayS:{name:'薬品スプレー小',kind:'spray',val:20},
+  sprayL:{name:'薬品スプレー大',kind:'spray',val:50},
+  m1:{name:'血清',kind:'mat',no:1},m2:{name:'銀の液体',kind:'mat',no:2},m3:{name:'青い結晶',kind:'mat',no:3},
+  m4:{name:'薬草',kind:'mat',no:4},m5:{name:'赤い粉',kind:'mat',no:5},m6:{name:'試薬',kind:'mat',no:6}
+};
+const IORDER=['bat','pistol','assault','rifle','magnum','grenade','sprayS','sprayL','m1','m2','m3','m4','m5','m6'];
+const MATS=['m1','m2','m3','m4','m5','m6'];
+const REP={1:{no:'研究レポート①',story:'「ARUMONO＝」'},2:{no:'研究レポート②',story:'「＝IMUKATARUMONO＝」'},3:{no:'研究レポート③',story:'「抗ウイルス剤であり、作製すれば平穏が訪れる」'}};
+const FILES={
+  A:{ans:'3152',r:{1:["「銀の液体」と「薬草」は、隣り合う枠に入れない。", "「青い結晶」も「血清」も使い、「青い結晶」を先に入れる。"],2:["「銀の液体」と「青い結晶」は、隣り合う枠に入れない。", "「血清」も「銀の液体」も使い、「血清」を先に入れる。"],3:["「血清」と「銀の液体」は、隣り合う枠に入れない。", "「血清」も「赤い粉」も使い、「血清」を先に入れる。"]}},
+  B:{ans:'4612',r:{1:["「薬草」は端の枠（1番か4番）に入れる。", "1番の枠の番号は、4番の枠の番号より大きい。"],2:["「試薬」も「血清」も使い、「試薬」を先に入れる。", "3番の枠には、番号が奇数の素材を入れる。"],3:["「銀の液体」は端の枠（1番か4番）に入れる。", "「赤い粉」を入れるなら、真ん中の枠（2番か3番）に。"]}},
+  C:{ans:'5364',r:{1:["「銀の液体」と「赤い粉」は、どちらか一方しか使わない。", "1番の枠の番号は、4番の枠の番号より大きい。"],2:["「青い結晶」も「試薬」も使い、「青い結晶」を先に入れる。", "「血清」と「青い結晶」は、隣り合う枠に入れない。"],3:["「赤い粉」は端の枠（1番か4番）に入れる。", "「血清」と「試薬」は、どちらか一方しか使わない。"]}},
+  D:{ans:'2415',r:{1:["番号がいちばん小さい素材は、2番か3番の枠に入れる。", "「赤い粉」は端の枠（1番か4番）に入れる。"],2:["「青い結晶」と「赤い粉」は、隣り合う枠に入れない。", "「銀の液体」も「薬草」も使い、「銀の液体」を先に入れる。"],3:["「薬草」も「血清」も使い、「薬草」を先に入れる。", "「血清」と「試薬」は、隣り合う枠に入れない。"]}},
+  E:{ans:'6231',r:{1:["「青い結晶」と「試薬」は、隣り合う枠に入れない。", "「試薬」は端の枠（1番か4番）に入れる。"],2:["「血清」は端の枠（1番か4番）に入れる。", "「青い結晶」と「薬草」は、どちらか一方しか使わない。"],3:["「薬草」と「試薬」は、隣り合う枠に入れない。", "「銀の液体」も「青い結晶」も使い、「銀の液体」を先に入れる。"]}},
+  F:{ans:'1543',r:{1:["3番の枠には、番号が偶数の素材を入れる。", "「血清」も「薬草」も使い、「血清」を先に入れる。"],2:["4つの素材の番号を足すと13になる。", "「赤い粉」を入れるなら、真ん中の枠（2番か3番）に。"],3:["「赤い粉」と「試薬」は、どちらか一方しか使わない。", "「薬草」と「試薬」は、どちらか一方しか使わない。"]}}
+};
+const FKEYS=Object.keys(FILES);
+
+const CRAFT_PEN=30,TEST_PEN=20;
+const MATNO=n=>MATS.find(m=>IT[m].no===+n);
+const PCOL=['#3B7DD8','#D1495B','#2A9D6F','#C98B12','#8E5CC4','#1E9AA8'];
+const SIGN={g:'平気',y:'ふつう',r:'ヤバい',n:'サインなし（時間切れ）'};
+const FAC={
+  arm:{name:'武器庫',cap:2},ammo:{name:'弾薬庫',cap:2},med:{name:'薬品庫',cap:2},lab:{name:'研究所',cap:1},none:{name:'行き先なし（時間切れ）',cap:0}
+};
+const FKEYS4=['arm','ammo','med','lab'];
+const ARM_DIE=[null,'grenade','bat','pistol','assault','rifle','magnum'];
+const AMMO_DIE=[0,1,1,2,2,3,3];
+const LAB_NEED={std:{1:5,2:7,3:10},short:{1:3,2:5,3:7}};
+const START_POOL=['bat','pistol'],START_AMMO=3;
+const DEFAULT_OPT={useN:1,keepGuns:false,lab:'std',startArea:1,file:'R',timer:45};
+
+let G=null,uid=0;
+let rollDie=()=>1+Math.floor(Math.random()*6);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pn=i=>(G.names&&G.names[i])||`P${i+1}`;
+function glog(t){G.log.unshift({t:`E${G.area}-R${G.turn}`,m:t})}
+function seatsFrom(st){return Array.from({length:st.n},(_,i)=>(st.startP+i)%st.n)}
+function optText(o){
+  const a=['施設ルール',`1人${o.useN}個まで使う`,o.keepGuns?'銃は使っても残る':'銃も使い捨て',o.lab==='short'?'研究3/5/7':'研究5/7/10',o.timer?`制限時間${o.timer}秒`:'制限時間なし'];
+  if(o.startArea!==1)a.push(`エリア${o.startArea}から開始`);return a.join('／')}
+function needOf(st,a){return LAB_NEED[st.opt.lab||'std'][a]}
+function newZ(type,mat){return {id:++uid,type,owner:null,sign:null,hidden:true,dmg:0,frozen:false,mat:mat||0}}
+function resetZ(z){z.owner=null;z.sign=null;z.hidden=true;z.dmg=0;z.frozen=false;return z}
+function rowOfIn(st,z){if(st.inside.some(x=>x.id===z.id))return 0;for(const s of[1,2,3,4])if(st.slots[s].some(x=>x.id===z.id))return s;return -1}
+function occRowsIn(st){const r=[];if(st.inside.length)r.push(0);for(const s of[1,2,3,4])if(st.slots[s].length)r.push(s);return r}
+function effAtkIn(st,k,z){const it=IT[k];if(!it||it.kind!=='weapon')return 0;const i=occRowsIn(st).indexOf(rowOfIn(st,z));return (i>=0&&i<it.reach)?it.atk:0}
+function curUse(st){return st.phase==='use'||st.phase==='test'||st.phase==='craft'?st.useOrder[st.ucur]:null}
+function isLabWorker(st,seat){return st.area===0&&st.labWorker===seat}
+function onBoard(st){return [1,2,3,4].reduce((x,s)=>x+st.slots[s].length,0)+st.inside.length}
+function decoded(st){return !st.rep||st.rep.prog>=st.rep.need}
+function addReport(a){if(!G.reports.some(r=>r.a===a))G.reports.push({a,...REP[a],text:FILES[G.file].r[a]})}
+function evPush(st,seat,k,d){if(!st.ev)st.ev=[];st.ev.push(Object.assign({ms:Date.now()-(st.t0||Date.now()),a:st.area,t:st.turn,p:seat,k,dg:Math.min(st.danger,100)},d||{}))}
+function addDanger(v){G.danger=Math.min(100,G.danger+v)}
+
+function newGame(names,opt){
+  opt={...DEFAULT_OPT,...opt};
+  const file=opt.file==='R'?FKEYS[Math.floor(Math.random()*FKEYS.length)]:opt.file;
+  G={rule:'facility',n:names.length,names:[...names],area:1,turn:1,startP:0,log:[],reports:[],skipped:[],file,opt,hist:[],result:'プレイ中',msg:'',rev:0,
+     st:{kills:0,overkill:0,itemsUsed:0,itemsGot:0,ammoGot:0,ammoUsed:0,maxDanger:0,sprayed:0,crafts:0,tests:0,timeouts:0,areaTurns:{},
+         visits:{arm:0,ammo:0,med:0,lab:0,none:0},bumped:0,labWaste:0,matsGot:0,matsLost:0},
+     gid:Date.now().toString(36),t0:Date.now(),ev:[],revealed:[false,false,false,false]};
+  for(const a of[1,2,3,0]){if(a===opt.startArea)break;addReport(a)}
+  glog(`${G.n}人でテスト開始（${optText(G.opt)}）。研究ファイル${file}を引いた`);
+  setupArea(opt.startArea);
+}
+function setupArea(a){
+  G.area=a;G.turn=1;G.startP=0;
+  G.zDeck=[];
+  const list=[];for(const[k,c]of Object.entries(ZDECK[a]))for(let i=0;i<c*G.n;i++)list.push(k);
+  shuffle(list);
+  list.forEach((k,i)=>G.zDeck.push(newZ(k,a===0?(i%6)+1:0)));
+  const ans=FILES[G.file].ans;
+  G.zDeck.push(newZ('boss',a===0?+ans[Math.floor(Math.random()*4)]:0));
+  shuffle(G.zDeck);G.zKilled=[];
+  G.slots={1:[],2:[],3:[],4:[]};G.inside=[];G.pending=[];
+  G.danger=0;G.kills=0;G.bossDead=false;G.clearReady=false;
+  G.rep=a===0?null:{a,have:false,prog:0,need:needOf(G,a)};
+  G.pool=[...START_POOL];G.ammo=START_AMMO;G.discard=0;
+  G.lastTest=null;G.lastCraft=null;G.results=null;
+  evPush(G,null,'area',{res:'エリア'+a});
+  glog(`エリア${a}開始。ゾンビ山札${G.zDeck.length}枚（意思のあるゾンビ1枚を含む）。共有アイテム：釘バット・ピストル銃・弾${START_AMMO}発`);
+  beginPlace();
+}
+
+/* ---------- ① ゾンビを伏せる（全員同時） ---------- */
+function refillZ(){
+  if(!G.zDeck.length&&G.zKilled.length){G.zDeck=shuffle(G.zKilled.map(resetZ));G.zKilled=[];glog('ゾンビ山札が尽きたので、倒したゾンビをシャッフルして山札にした')}
+}
+function beginPlace(){
+  G.phase='place';G.drawn=Array(G.n).fill(null);G.signed=Array(G.n).fill(false);G.picks=Array(G.n).fill(null);
+  G.results=null;G.useOrder=[];G.ucur=0;G.used=0;G.labWorker=null;G.labbers=[];G.msg='';G.deadline=null;G.tStart=Date.now();G.turnAct=null;
+  for(const s of seatsFrom(G)){refillZ();if(G.zDeck.length)G.drawn[s]=G.zDeck.pop();else G.signed[s]=true}
+  if(G.signed.every(Boolean)){glog('ゾンビ山札が空のため、誰もゾンビを引かなかった');beginPoint()}
+}
+function chooseSign(seat,s){
+  const z=G.drawn[seat];if(!z||G.signed[seat])return false;
+  z.owner=seat;z.sign=s;z.hidden=true;G.pending.push(z);G.signed[seat]=true;
+  evPush(G,seat,'sign',{s,z:ZT[z.type].name,mat:z.mat||''});
+  glog(`${pn(seat)}がゾンビを伏せた（サイン：${SIGN[s]}）`);
+  if(G.signed.every(Boolean))beginPoint();
+  return true;
+}
+
+/* ---------- ② 行き先を指差す（全員同時・相談禁止） ---------- */
+function beginPoint(){G.phase='point';G.picks=Array(G.n).fill(null);G.deadline=null;G.tStart=Date.now()}
+function pick(seat,f){
+  if(G.picks[seat]!=null)return false;G.picks[seat]=f;
+  if(G.picks.every(x=>x!=null))resolvePicks();
+  return true;
+}
+function resolvePicks(){
+  const by={arm:[],ammo:[],med:[],lab:[],none:[]};
+  for(const s of seatsFrom(G))by[G.picks[s]||'none'].push(s);
+  const res=[];
+  for(const f of['arm','ammo','med']){
+    by[f].forEach((s,i)=>{
+      G.st.visits[f]++;
+      if(i>=FAC[f].cap){res.push({p:s,f,bump:true,got:`${FAC[f].cap}人までなので、サイコロを振れなかった`});G.st.bumped++;return}
+      const d=rollDie();let got;
+      if(f==='arm'){const k=ARM_DIE[d];G.pool.push(k);G.st.itemsGot++;got=IT[k].name}
+      else if(f==='ammo'){const n=AMMO_DIE[d];G.ammo+=n;G.st.ammoGot+=n;got=`弾${n}発`}
+      else{const k=d===6?'sprayL':'sprayS';G.pool.push(k);G.st.itemsGot++;got=IT[k].name}
+      res.push({p:s,f,die:d,got});
+    });
+  }
+  by.lab.forEach((s,i)=>{
+    G.st.visits.lab++;
+    let got;
+    if(i>0){got=G.area===0?'調合室で作業できるのは1人まで':'同じラウンドに2人以上いても、解読は1段階しか進まない';G.st.labWaste++}
+    else if(G.area===0){got='調合室で試験調合か本調合ができる'}
+    else if(!G.rep.have){got='まだ研究レポートがない（意思のあるゾンビを倒すと手に入る）';G.st.labWaste++}
+    else if(G.rep.prog>=G.rep.need){got='解読はもう終わっている';G.st.labWaste++}
+    else{G.rep.prog++;got=`解読が進んだ（${G.rep.prog}/${G.rep.need}）`;if(G.rep.prog>=G.rep.need)G.clearReady=true}
+    res.push({p:s,f:'lab',got,first:i===0});
+  });
+  by.none.forEach(s=>{G.st.visits.none++;res.push({p:s,f:'none',got:'どこにも行かなかった'})});
+  res.forEach(r=>evPush(G,r.p,'point',{fac:FAC[r.f].name,die:r.die||'',res:r.got}));
+  G.results=res;G.labbers=by.lab;G.labWorker=G.area===0&&by.lab.length?by.lab[0]:null;
+  G.useOrder=seatsFrom(G).filter(s=>!by.lab.includes(s)||s===G.labWorker);
+  glog('行き先：'+seatsFrom(G).map(s=>{const r=res.find(x=>x.p===s);return `${pn(s)}→${FAC[r.f].name}${r.die?`（${r.die}）`:''}：${r.got}`}).join('／'));
+  if(G.clearReady)glog(`${REP[G.area].no}の解読が終わった！`);
+  G.phase='reveal';G.deadline=null;
+}
+
+/* ---------- ③ 共有アイテムを順番に使う ---------- */
+function beginUse(){
+  if(G.clearReady){areaClear();return}
+  G.phase='use';G.ucur=0;G.used=0;G.turnAct=null;G.tStart=Date.now();G.deadline=null;G.msg='';
+  const escapeOpen=G.area!==0&&G.bossDead&&G.rep&&G.rep.have&&!decoded(G);
+  if(!G.useOrder.length){glog('全員が研究所にいたので、アイテムを使う人はいなかった');endRound();return}
+  if(!onBoard(G)&&G.danger===0&&G.labWorker==null&&!escapeOpen){glog('盤上にゾンビがおらず危険度も0%なので、アイテムを使う場面はなかった');endRound();return}
+}
+function takeFromPool(k){const i=G.pool.indexOf(k);if(i<0)return false;G.pool.splice(i,1);G.discard++;return true}
+function afterUse(){G.used++;G.st.itemsUsed++;G.turnAct='A';if(G.phase==='use'&&G.used>=G.opt.useN)endUseTurn()}
+function useWeapon(seat,k,id){
+  const it=IT[k];const f=findZ(id);if(!f)return false;const[z,arr]=f;
+  const atk=effAtkIn(G,k,z);if(atk<=0||G.ammo<it.ammo)return false;
+  G.ammo-=it.ammo;G.st.ammoUsed+=it.ammo;
+  if(!(G.opt.keepGuns&&it.ammo>0))takeFromPool(k);
+  const t=ZT[z.type];const rem=t.hp-z.dmg;z.dmg+=atk;const dead=z.dmg>=t.hp;
+  if(dead){G.st.kills++;G.st.overkill+=atk-rem}
+  evPush(G,seat,'attack',{item:it.name,tgt:zoneOf(G,z)+'・'+(z.hidden?nameOf(G,z.owner)+'の伏せゾンビ':t.name),z:t.name,atk,res:dead?'撃破':'残り体力'+(t.hp-z.dmg),ammo:it.ammo});
+  G.msg=z.hidden
+    ?`${pn(seat)}が${pn(z.owner)}の伏せゾンビに${it.name}（攻撃力${atk}${it.ammo?`・弾${it.ammo}発`:''}）→ 「${dead?'倒れた！':'まだ生きている'}」`
+    :`${pn(seat)}が${t.name}に${it.name}（攻撃力${atk}${it.ammo?`・弾${it.ammo}発`:''}）→ ${dead?'撃破！':`残り体力${t.hp-z.dmg}`}`;
+  glog(G.msg);
+  if(dead)kill(z,arr,seat);
+  afterUse();return true;
+}
+function kill(z,arr,seat){
+  arr.splice(arr.indexOf(z),1);G.kills++;
+  if(z.type==='boss'){bossDown(z,seat);return}
+  G.zKilled.push(z);
+  if(G.area===0&&z.mat)dropMat(z.mat,z);
+}
+function dropMat(no,z){
+  const k=MATNO(no);
+  if(G.pool.includes(k)){glog(`${z.hidden?'伏せゾンビ':ZT[z.type].name}は「${IT[k].name}（${no}）」を持っていたが、もう共有アイテムにある`);return}
+  G.pool.push(k);G.st.matsGot++;glog(`${z.hidden?'伏せゾンビ':ZT[z.type].name}が「${IT[k].name}（${no}）」を落とした。共有アイテムに加わった`);
+  G.msg+=`　「${IT[k].name}（${no}）」が手に入った`;
+}
+function bossDown(z,seat){
+  G.bossDead=true;evPush(G,seat,'boss');
+  if(G.area===0){glog('エリア0の意思のあるゾンビを倒した');if(z.mat)dropMat(z.mat,z);return}
+  G.rep.have=true;
+  glog(`意思のあるゾンビを撃破！${REP[G.area].no}を手に入れた。研究所で解読を進めよう（${G.rep.prog}/${G.rep.need}）`);
+  G.msg+=`　意思のあるゾンビだった！${REP[G.area].no}を手に入れた`;
+}
+function useGrenade(seat,slot){
+  if(![1,2,3,4].includes(slot))return false;takeFromPool('grenade');
+  G.slots[slot].forEach(z=>z.frozen=true);
+  evPush(G,seat,'grenade',{item:'閃光グレネード',tgt:'ゾーン'+slot,res:G.slots[slot].length+'体を足止め'});
+  G.msg=`${pn(seat)}がアプローチゾーン${slot}に閃光グレネード。${G.slots[slot].length}体の進行が1ラウンド止まる`;glog(G.msg);
+  afterUse();return true;
+}
+function useSpray(seat,k){
+  takeFromPool(k);const v=IT[k].val;const b=G.danger;G.danger=Math.max(0,G.danger-v);G.st.sprayed+=b-G.danger;
+  evPush(G,seat,'spray',{item:IT[k].name,res:`${b}%→${G.danger}%`});
+  G.msg=`${pn(seat)}が${IT[k].name}を使った。危険度 ${b}% → ${G.danger}%`;glog(G.msg);
+  afterUse();return true;
+}
+function endUseTurn(act){
+  if(G.phase!=='use')return;
+  evPush(G,curUse(G),'endturn',{act:act||G.turnAct||'C',sec:Math.round((Date.now()-G.tStart)/100)/10});
+  G.ucur++;G.used=0;G.turnAct=null;G.tStart=Date.now();G.deadline=null;
+  if(G.ucur>=G.useOrder.length)endRound();
+}
+/* エリア0：研究所に入った1人だけが調合室で作業できる */
+function labTest(seat,seq){
+  if(!Array.isArray(seq)||seq.length!==2||seq[0]===seq[1]||!seq.every(k=>IT[k]&&IT[k].kind==='mat'&&G.pool.includes(k)))return false;
+  const a=FILES[G.file].ans;const nx=String(IT[seq[0]].no),ny=String(IT[seq[1]].no);let res;
+  if(a.includes(nx)&&a.includes(ny))res=a.indexOf(nx)<a.indexOf(ny)?'order':'reverse';
+  else{res='boom';addDanger(TEST_PEN);seq.forEach(takeFromPool);G.st.matsLost+=2}
+  G.st.tests++;G.lastTest={l:seq[0],r:seq[1],res};G.turnAct='E';
+  const txt={order:'反応あり：どちらも使う素材。左の素材を先に入れる',reverse:'反応あり：どちらも使う素材。右の素材を先に入れる',boom:`爆発！少なくとも一方は使わない素材（危険度+${TEST_PEN}%、2つとも失った）`}[res];
+  glog(`${pn(seat)}の試験調合：「${IT[seq[0]].name}」＋「${IT[seq[1]].name}」→ ${txt}`);
+  evPush(G,seat,'test',{item:IT[seq[0]].name+'＋'+IT[seq[1]].name,res:{order:'反応あり（左が先）',reverse:'反応あり（右が先）',boom:'爆発'}[res]});
+  G.phase='test';return true;
+}
+function labCraft(seat,seq){
+  if(!Array.isArray(seq)||seq.length!==4||new Set(seq).size!==4||!seq.every(k=>IT[k]&&IT[k].kind==='mat'&&G.pool.includes(k)))return false;
+  const ans=FILES[G.file].ans;const rows=[];let failAt=-1;G.st.crafts++;G.turnAct='D';
+  for(let i=0;i<4;i++){const was=G.revealed[i];G.revealed[i]=true;const ok=String(IT[seq[i]].no)===ans[i];
+    rows.push({placed:seq[i],answer:MATNO(ans[i]),ok,newly:!was});if(!ok){failAt=i;break}}
+  for(let i=rows.length;i<4;i++)rows.push({placed:seq[i],answer:null,ok:null,newly:false});
+  G.lastCraft={rows,failAt};const num=seq.map(k=>IT[k].no).join('');
+  evPush(G,seat,'craft',{item:num,res:failAt<0?'成功':(failAt+1)+'番で不一致'});
+  if(failAt<0){glog(`${pn(seat)}の本調合：${num} → 解答カード4枚すべて一致。ARUMONO完成！`);G.st.areaTurns[0]=G.turn;G.result='脱出成功';G.phase='win';evPush(G,seat,'win');return true}
+  glog(`${pn(seat)}の本調合：${num} → ${failAt+1}番の解答カードで不一致（正解は「${IT[MATNO(ans[failAt])].name}」）。危険度+${CRAFT_PEN}%、素材4つを失った`);
+  addDanger(CRAFT_PEN);seq.forEach(takeFromPool);G.st.matsLost+=4;G.phase='craft';return true;
+}
+function escapeArea(seat){
+  G.skipped.push(G.area);evPush(G,seat,'escape',{res:REP[G.area].no+'を諦めた'});
+  glog(`${pn(seat)}の判断で、${REP[G.area].no}の解読を諦めて先へ進んだ（${G.rep.prog}/${G.rep.need}まで解読）`);
+  areaClear();
+}
+function areaClear(){
+  G.st.areaTurns[G.area]=G.turn;
+  if(decoded(G))addReport(G.area);
+  G.phase='clear';G.deadline=null;
+}
+
+/* ---------- ④ ラウンド終了と、次のラウンドの接近 ---------- */
+function endRound(){
+  const dd=Math.min(G.danger,100);G.st.maxDanger=Math.max(G.st.maxDanger,dd);
+  G.hist.push({a:G.area,t:G.turn,d:dd,k:G.kills,z:[1,2,3,4].reduce((x,s)=>x+G.slots[s].length,0),in:G.inside.length,pool:G.pool.length,ammo:G.ammo,lab:G.rep?`${G.rep.have?G.rep.prog:'-'}/${G.rep.need}`:''});
+  if(G.danger>=100){gameOver('危険度100%のままラウンドを終えた');return}
+  G.turn++;G.startP=(G.startP+1)%G.n;
+  approach();
+  beginPlace();
+}
+function approach(){
+  let inc=0;G.inside.forEach(z=>inc+=ZT[z.type].dg);
+  if(inc){addDanger(inc);glog(`エリア内のゾンビ${G.inside.length}体が残ったまま → 危険度+${inc}%`)}
+  const ns={1:[],2:[],3:[],4:[]};let arr=0,arrN=0,rev=0;
+  for(const s of[1,2,3,4])for(const z of G.slots[s]){
+    if(z.frozen){z.frozen=false;ns[s].push(z);continue}
+    const t=s-1;
+    if(t===0){z.hidden=false;G.inside.push(z);arr+=ZT[z.type].dg;arrN++}
+    else{if(t===2&&z.hidden){z.hidden=false;rev++}ns[t].push(z)}
+  }
+  if(arrN){addDanger(arr);evPush(G,null,'invade',{res:arrN+'体・危険度+'+arr+'%'});glog(`${arrN}体がエリア内に侵入 → 危険度+${arr}%`)}
+  if(rev)glog(`アプローチゾーン2に来た伏せゾンビ${rev}体が表になった`);
+  G.pending.forEach(z=>ns[4].push(z));
+  if(G.pending.length)glog(`伏せゾンビ${G.pending.length}枚をアプローチゾーン4に配置`);
+  G.slots=ns;G.pending=[];
+}
+function gameOver(r){evPush(G,null,'over',{res:r});G.phase='over';G.overReason=r;G.st.areaTurns[G.area]=G.turn;G.result=`失敗（${r}）`;glog(`失敗：${r}`)}
+function allZ(){const r=[];for(const s of[4,3,2,1])for(const z of G.slots[s])r.push([z,G.slots[s]]);for(const z of G.inside)r.push([z,G.inside]);return r}
+function findZ(id){return allZ().find(([z])=>z.id===id)}
+function nameOf(st,i){return i==null?'':(st.names&&st.names[i])||`P${i+1}`}
+function zoneOf(st,z){if(st.inside.includes(z))return 'エリア内';for(const s of[1,2,3,4])if(st.slots[s].includes(z))return 'ゾーン'+s;return ''}
+
+/* ---------- 時間切れ ---------- */
+function timeoutSeats(seats){
+  let any=false;
+  for(const s of seats){
+    if(G.phase==='place'&&!G.signed[s]){G.st.timeouts++;evPush(G,s,'timeout',{res:'ゾンビをサインなしで伏せた'});chooseSign(s,'n');any=true}
+    else if(G.phase==='point'&&G.picks[s]==null){G.st.timeouts++;evPush(G,s,'timeout',{res:'行き先を選ばなかった'});glog(`${pn(s)}は時間切れで、どこにも行かなかった`);pick(s,'none');any=true}
+    else if(G.phase==='use'&&curUse(G)===s){G.st.timeouts++;evPush(G,s,'timeout',{res:'アイテムを使わなかった'});glog(`${pn(s)}は時間切れ。何もせずに手番が終わった`);G.msg=`${pn(s)}は時間切れ`;endUseTurn('T');any=true}
+  }
+  return any;
+}
+
+/* ---------- 行動の受け付け（ホストだけ）。true で状態が変わった ---------- */
+function applyAction(seat,a){
+  if(!G||seat==null)return false;
+  const cur=curUse(G);
+  switch(a.t){
+    case 'sign':if(G.phase!=='place'||!['g','y','r'].includes(a.s))return false;return chooseSign(seat,a.s);
+    case 'pick':if(G.phase!=='point'||!FKEYS4.includes(a.f))return false;return pick(seat,a.f);
+    case 'go':if(G.phase!=='reveal')return false;beginUse();return true;
+    case 'use':{
+      if(G.phase!=='use'||seat!==cur||isLabWorker(G,seat)||G.used>=G.opt.useN)return false;
+      const k=a.k;if(!IT[k]||!G.pool.includes(k))return false;const it=IT[k];
+      if(it.kind==='weapon')return useWeapon(seat,k,a.id);
+      if(it.kind==='grenade')return useGrenade(seat,a.slot);
+      if(it.kind==='spray')return useSpray(seat,k);
+      return false}
+    case 'pass':if(G.phase!=='use'||seat!==cur)return false;endUseTurn();return true;
+    case 'labtest':if(G.phase!=='use'||seat!==cur||!isLabWorker(G,seat))return false;return labTest(seat,a.seq);
+    case 'labcraft':if(G.phase!=='use'||seat!==cur||!isLabWorker(G,seat))return false;return labCraft(seat,a.seq);
+    case 'resok':if(G.phase!=='test'&&G.phase!=='craft')return false;G.phase='use';endUseTurn();return true;
+    case 'escape':if(G.phase!=='use'||seat!==cur||G.area===0||!G.bossDead||decoded(G))return false;escapeArea(seat);return true;
+    case 'next':if(G.phase!=='clear')return false;setupArea(NEXT[G.area]);return true;
+  }
+  return false;
+}
+
+/* =====================================================================
+   テスト記録の抽出（施設ルール用）
+   ===================================================================== */
+const EVK={area:'エリア開始',sign:'ゾンビを伏せた',point:'行き先',attack:'攻撃',grenade:'閃光グレネード',spray:'薬品スプレー',test:'試験調合の結果',craft:'本調合の結果',timeout:'時間切れ',endturn:'手番終了',invade:'エリア内に侵入',boss:'意思のあるゾンビ撃破',escape:'解読を諦めて先へ',win:'脱出成功',over:'脱出失敗'};
+const ACTK={A:'アイテムを使った',C:'パス',D:'本調合',E:'試験調合',T:'時間切れ'};
+const REC_KEY='arumono_records_f';
+function areaTurns(st){const at=st.st.areaTurns;const f=a=>at[a]!=null?at[a]:(st.area===a&&st.phase!=='win'&&st.phase!=='over'?st.turn:'');return {1:f(1),2:f(2),3:f(3),0:f(0)}}
+function playerStats(st){
+  const P=Array.from({length:st.n},(_,i)=>({name:nameOf(st,i),arm:0,ammo:0,med:0,lab:0,none:0,bump:0,uses:0,turns:0,C:0,T:0,secSum:0,secMax:0,kills:0,dmg:0,ammoUsed:0,signs:{g:0,y:0,r:0,n:0}}));
+  const fk={'武器庫':'arm','弾薬庫':'ammo','薬品庫':'med','研究所':'lab'};
+  for(const e of st.ev||[]){const p=P[e.p];if(!p)continue;
+    if(e.k==='point'){const f=fk[e.fac]||'none';p[f]++;if(String(e.res).includes('振れなかった'))p.bump++}
+    if(e.k==='endturn'){p.turns++;if(e.act==='C')p.C++;if(e.act==='T')p.T++;p.secSum+=e.sec;p.secMax=Math.max(p.secMax,e.sec)}
+    if(e.k==='attack'){p.dmg+=e.atk;p.uses++;p.ammoUsed+=e.ammo||0;if(e.res==='撃破')p.kills++}
+    if(e.k==='grenade'||e.k==='spray')p.uses++;
+    if(e.k==='sign')p.signs[e.s]=(p.signs[e.s]||0)+1;
+  }
+  P.forEach(p=>p.secAvg=p.turns?Math.round(p.secSum/p.turns*10)/10:0);return P;
+}
+function signTable(st){const T={};for(const e of st.ev||[])if(e.k==='sign'){const r=T[e.s]=T[e.s]||{};r[e.z]=(r[e.z]||0)+1}return T}
+function gameSummary(st){
+  const at=areaTurns(st);const P=playerStats(st);const ev=st.ev||[];
+  const sum=k=>P.reduce((a,p)=>a+(p[k]||0),0);
+  const craftFails=ev.filter(e=>e.k==='craft'&&e.res!=='成功').map(e=>e.res).join('／');
+  const end=ev.length?ev[ev.length-1].ms:0;const v=st.st.visits||{};const o=st.opt||{};
+  return {
+    記録ID:st.gid||'',日時:new Date(Date.now()-end).toLocaleString('ja-JP'),版:VERSION,人数:st.n,プレイヤー:Array.from({length:st.n},(_,i)=>nameOf(st,i)).join('・'),
+    '1人が使えるアイテム数':o.useN,銃:o.keepGuns?'使っても残る':'使い捨て',研究に必要なラウンド:o.lab==='short'?'3/5/7':'5/7/10',制限時間秒:o.timer||0,開始エリア:o.startArea,研究ファイル:st.file,
+    結果:st.phase==='win'?'脱出成功':st.phase==='over'?'脱出失敗':'途中',失敗理由:st.phase==='over'?st.overReason:'',終了時のエリア:st.area,
+    エリア1ラウンド数:at[1],エリア2ラウンド数:at[2],エリア3ラウンド数:at[3],エリア0ラウンド数:at[0],合計ラウンド数:[at[1],at[2],at[3],at[0]].reduce((a,b)=>a+(+b||0),0),
+    解読したレポート:(st.reports||[]).length,諦めたレポート:(st.skipped||[]).join('・'),倒したゾンビ:st.st.kills,余ったダメージ:st.st.overkill,
+    武器庫に行った:v.arm||0,弾薬庫に行った:v.ammo||0,薬品庫に行った:v.med||0,研究所に行った:v.lab||0,行き先なし:v.none||0,上限であぶれた:st.st.bumped,研究所の空振り:st.st.labWaste,
+    手に入れたアイテム:st.st.itemsGot,使ったアイテム:st.st.itemsUsed,手に入れた弾:st.st.ammoGot,使った弾:st.st.ammoUsed,手に入れた素材:st.st.matsGot,失った素材:st.st.matsLost,
+    試験調合回数:st.st.tests,本調合回数:st.st.crafts,本調合の失敗:craftFails,スプレーで下げた危険度:st.st.sprayed,最高危険度:st.st.maxDanger,時間切れ回数:st.st.timeouts,
+    パスした手番:sum('C'),平均の手番秒数:sum('turns')?Math.round(sum('secSum')/sum('turns')*10)/10:0,プレイ時間分:Math.round(end/6000)/10
+  };
+}
+const csvQ=x=>{const t=x===null||x===undefined?'':String(x);return /[",\n\r]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
+function toCSV(head,rows){return '﻿'+[head.map(csvQ).join(','),...rows.map(r=>r.map(csvQ).join(','))].join('\r\n')}
+function csvSummary(list){const head=Object.keys(gameSummary({n:0,opt:{},st:{areaTurns:{},visits:{}},reports:[],skipped:[],ev:[],slots:{},inside:[]}));return toCSV(head,list.map(o=>head.map(h=>o[h])))}
+function csvTurns(st){return toCSV(['記録ID','エリア','ラウンド','ラウンド終了時の危険度%','このエリアの撃破数(累計)','盤上のゾンビ','エリア内のゾンビ','共有アイテム','弾','研究の進み'],(st.hist||[]).map(h=>[st.gid,h.a,h.t,h.d,h.k,h.z,h.in,h.pool,h.ammo,h.lab]))}
+function csvEvents(st){return toCSV(['記録ID','経過秒','エリア','ラウンド','プレイヤー','種類','行き先','サイコロ','行動','アイテム・素材','対象','サイン','伏せたゾンビ','素材番号','攻撃力','使った弾','結果','その時点の危険度%','手番にかけた秒数'],
+  (st.ev||[]).map(e=>[st.gid,Math.round(e.ms/100)/10,e.a,e.t,nameOf(st,e.p),EVK[e.k]||e.k,e.fac||'',e.die||'',e.act?ACTK[e.act]:'',e.item||'',e.tgt||'',e.s?SIGN[e.s]:'',e.k==='sign'?e.z:'',e.mat||'',e.atk??'',e.ammo??'',e.res||'',e.dg,e.sec??'']))}
+function csvPlayers(st){return toCSV(['記録ID','プレイヤー','武器庫','弾薬庫','薬品庫','研究所','行き先なし','上限であぶれた','使ったアイテム','使った弾','アイテムの手番','パス','時間切れ(使う段階)','平均の手番秒数','最長の手番秒数','撃破数','与えたダメージ','サイン緑','サイン黄','サイン赤','サインなし'],
+  playerStats(st).map(p=>[st.gid,p.name,p.arm,p.ammo,p.med,p.lab,p.none,p.bump,p.uses,p.ammoUsed,p.turns,p.C,p.T,p.secAvg,p.secMax,p.kills,p.dmg,p.signs.g,p.signs.y,p.signs.r,p.signs.n]))}
+function recList(){return store.get(REC_KEY)||[]}
+function saveRecord(st){if(!st||!st.gid)return;const l=recList();const s=gameSummary(st);const i=l.findIndex(r=>r.記録ID===st.gid);if(i>=0)l[i]=s;else l.push(s);store.set(REC_KEY,l)}
+function stamp(){const d=new Date(),z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`}
+function downloadFile(name,text,type){try{const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);return true}catch(e){return false}}
+function exportKind(st,kind){
+  const f=`arumono-facility_${stamp()}`;
+  if(kind==='sum')return downloadFile(`${f}_summary.csv`,csvSummary([gameSummary(st)]),'text/csv');
+  if(kind==='all')return downloadFile(`arumono-facility_history_${stamp()}.csv`,csvSummary(recList()),'text/csv');
+  if(kind==='turn')return downloadFile(`${f}_rounds.csv`,csvTurns(st),'text/csv');
+  if(kind==='ev')return downloadFile(`${f}_actions.csv`,csvEvents(st),'text/csv');
+  if(kind==='pl')return downloadFile(`${f}_players.csv`,csvPlayers(st),'text/csv');
+  if(kind==='json')return downloadFile(`${f}_alldata.json`,JSON.stringify({summary:gameSummary(st),players:playerStats(st),signs:signTable(st),opt:st.opt,file:st.file,events:st.ev,rounds:st.hist,log:[...st.log].reverse(),state:st},null,1),'application/json');
+}
+function analyticsHTML(st){
+  const P=playerStats(st);const S2=signTable(st);const zs=['ノーマルゾンビ','デカゾンビ','汚染ゾンビ','異形ゾンビ','意思のあるゾンビ'];
+  const pt=`<div class="tblwrap"><table class="tbl"><thead><tr><th>プレイヤー</th><th>武器庫</th><th>弾薬庫</th><th>薬品庫</th><th>研究所</th><th>あぶれ</th><th>使った</th><th>パス</th><th>時間切れ</th><th>撃破</th><th>与ダメ</th><th>平均秒</th></tr></thead><tbody>${P.map(p=>`<tr><td>${esc(p.name)}</td><td>${p.arm}</td><td>${p.ammo}</td><td>${p.med}</td><td>${p.lab}</td><td>${p.bump}</td><td>${p.uses}</td><td>${p.C}</td><td class="${p.T||p.none?'hot':''}">${p.T+p.none}</td><td>${p.kills}</td><td>${p.dmg}</td><td>${p.secAvg}</td></tr>`).join('')}</tbody></table></div>`;
+  const st2=`<div class="tblwrap"><table class="tbl"><thead><tr><th>サイン</th>${zs.map(z=>`<th>${z.replace('ゾンビ','').replace('意思のある','意思')}</th>`).join('')}<th>計</th></tr></thead><tbody>${['g','y','r','n'].filter(s=>S2[s]).map(s=>{const r=S2[s];const tot=Object.values(r).reduce((a,b)=>a+b,0);return `<tr><td>${SIGN[s]}</td>${zs.map(z=>`<td>${r[z]||0}</td>`).join('')}<td>${tot}</td></tr>`}).join('')||'<tr><td colspan="7">まだゾンビを伏せていません</td></tr>'}</tbody></table></div>`;
+  const n=recList().length;
+  return `<h3 style="font-size:16px">プレイヤー別</h3><p class="small">「あぶれ」は2人までの施設に3人目以上で行ってサイコロを振れなかった回数。「時間切れ」は行き先を選べなかった回数と、使う段階で時間切れになった回数の合計です。</p>${pt}
+  <h3 style="font-size:16px">サインと実際に伏せたゾンビ</h3>${st2}
+  <h3 style="font-size:16px">ファイルで保存</h3>
+  <p class="small">CSVはExcelやGoogleスプレッドシートでそのまま開けます。「これまでのまとめ」には、この端末で最後まで遊んだ施設ルールのゲームが1ゲーム1行で入ります（今${n}件）。今までのルールの記録とは別に保存されます。</p>
+  <div class="acts dlrow">
+    <button class="btn" data-act="dl" data-k="sum">このゲームのまとめ（CSV）</button>
+    <button class="btn" data-act="dl" data-k="turn">ラウンド推移（CSV）</button>
+    <button class="btn" data-act="dl" data-k="ev">行動ログ（CSV）</button>
+    <button class="btn" data-act="dl" data-k="pl">プレイヤー別（CSV）</button>
+    <button class="btn" data-act="dl" data-k="json">全データ（JSON）</button>
+    <button class="btn" data-act="dl" data-k="all" ${n?'':'disabled'}>これまでのまとめ（CSV・${n}件）</button>
+  </div>
+  <div class="acts">${ui.confirmClear?`<button class="btn warn" data-act="clearrec">本当にこの端末の記録を消す</button><button class="btn" data-act="noclear">やめる</button>`:`<button class="btn" data-act="askclear" ${n?'':'disabled'}>この端末の「これまでのまとめ」を消す</button>`}</div>`;
+}
+function summaryRows(v){
+  const at=areaTurns(v);const total=[at[1],at[2],at[3],at[0]].reduce((a,b)=>a+(+b||0),0);
+  return [['人数',`${v.n}人（${v.names.map(esc).join('・')}）`],['調整ルール',optText(v.opt)],['結果',v.result],['研究ファイル',v.file],
+    ['解読したレポート',`${v.reports.length}枚${v.skipped.length?`（諦めた：${v.skipped.map(a=>REP[a].no).join('・')}）`:''}`],
+    ['エリア1のラウンド数',at[1]||'-'],['エリア2のラウンド数',at[2]||'-'],['エリア3のラウンド数',at[3]||'-'],['エリア0のラウンド数',at[0]||'-'],
+    ['合計ラウンド',`${total}`],['倒したゾンビ',`${v.st.kills}体`],['手に入れたアイテム',`${v.st.itemsGot}個`],['使ったアイテム',`${v.st.itemsUsed}個`],
+    ['手に入れた弾',`${v.st.ammoGot}発`],['使った弾',`${v.st.ammoUsed}発`],['上限であぶれた',`${v.st.bumped}回`],['研究所の空振り',`${v.st.labWaste}回`],
+    ['試験調合',`${v.st.tests}回`],['本調合',`${v.st.crafts}回`],['スプレーで下げた危険度',`${v.st.sprayed}%`],['最高危険度',`${v.st.maxDanger}%`]];
+}
+function exportText(v){
+  const L=['ARUMONO テスト記録（'+VERSION+'）'];summaryRows(v).forEach(([a,b])=>L.push(`${a}: ${b}`));
+  L.push('','[ラウンドごとの推移] エリア-ラウンド / 危険度 / 撃破(累計) / 盤上 / エリア内 / 共有アイテム / 弾 / 研究');
+  v.hist.forEach(h=>L.push(`E${h.a}-R${h.t} / ${h.d}% / ${h.k} / ${h.z} / ${h.in} / ${h.pool} / ${h.ammo} / ${h.lab}`));
+  L.push('','[記録（古い順）]');[...v.log].reverse().forEach(l=>L.push(`${l.t} ${l.m}`));return L.join('\n');
+}
+
+/* =====================================================================
+   通信（PeerJS。?transport=bc で同じブラウザ内のタブ同士でテストできる）
+   ===================================================================== */
+const VERSION='施設ルール v0.1';
+const $=id=>document.getElementById(id);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+function bcTransport(){
+  class Conn{constructor(ch,me,peer){this.ch=ch;this.me=me;this.peer=peer;this.h={};this.open=false}
+    on(e,f){(this.h[e]=this.h[e]||[]).push(f)} emit(e,x){(this.h[e]||[]).forEach(f=>f(x))}
+    send(d){this.ch.postMessage({to:this.peer,from:this.me,data:JSON.parse(JSON.stringify(d))})} close(){}}
+  return class{constructor(id){this.id=id||('c'+Math.random().toString(36).slice(2,10));this.ch=new BroadcastChannel('arumono-fac-bc');this.h={};this.conns={};
+      this.ch.onmessage=e=>{const m=e.data;if(m.to!==this.id)return;let c=this.conns[m.from];
+        if(m.hello){if(!c){c=new Conn(this.ch,this.id,m.from);this.conns[m.from]=c;this.emit('connection',c)}this.ch.postMessage({to:m.from,from:this.id,ack:true});setTimeout(()=>{c.open=true;c.emit('open')},0);return}
+        if(m.ack){if(c){c.open=true;c.emit('open')}return}
+        if(c)c.emit('data',m.data)};
+      setTimeout(()=>this.emit('open',this.id),0)}
+    on(e,f){(this.h[e]=this.h[e]||[]).push(f)} emit(e,x){(this.h[e]||[]).forEach(f=>f(x))}
+    connect(id){const c=new Conn(this.ch,this.id,id);this.conns[id]=c;this.ch.postMessage({to:id,from:this.id,hello:true});return c}
+    destroy(){this.ch.close()}};
+}
+const TEST_BC=new URLSearchParams(location.search).get('transport')==='bc';
+function loadPeerJS(){return new Promise((res,rej)=>{if(window.Peer)return res();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>res();s.onerror=()=>rej(new Error('通信ライブラリを読み込めませんでした'));document.head.appendChild(s)})}
+async function makePeer(id){if(TEST_BC){const P=bcTransport();return new P(id)}await loadPeerJS();return id?new Peer(id,{debug:1}):new Peer({debug:1})}
+const peerId=code=>'arumono-fac-'+code;
+const CODE_CH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const newCode=()=>Array.from({length:4},()=>CODE_CH[Math.floor(Math.random()*CODE_CH.length)]).join('');
+let myCid=TEST_BC?'t'+Math.random().toString(36).slice(2,10):store.get('arumono_cid');if(!myCid){myCid='u'+Math.random().toString(36).slice(2,10);store.set('arumono_cid',myCid)}
+
+const N={mode:null,code:null,peer:null,conns:new Map(),hostConn:null,status:'',lobby:null,me:null,view:null};
+function hostSave(){if(N.mode!=='host')return;store.set('arumono_fhost_'+N.code,{lobby:N.lobby,G,uid});store.set('arumono_last_fhost',N.code)}
+function commit(){
+  if(G)G.rev++;
+  if(N.mode==='local'){N.view=G;render();return}
+  hostSave();
+  N.view=G?JSON.parse(JSON.stringify(G)):null;
+  for(const[cid,c]of N.conns){const seat=N.lobby.players.findIndex(p=>p.cid===cid);try{c.send({k:'sync',lobby:pubLobby(),G,you:seat,now:Date.now()})}catch(e){}}
+  render();
+}
+function pubLobby(){return {players:N.lobby.players.map(p=>({name:p.name,cid:p.cid,on:p.cid===myCid||N.conns.has(p.cid)})),opt:N.lobby.opt,started:N.lobby.started,code:N.code}}
+async function hostStart(name,resumeCode){
+  N.mode='host';N.status='部屋を作っています…';render();
+  const saved=resumeCode?store.get('arumono_fhost_'+resumeCode):null;
+  for(let tries=0;tries<5;tries++){
+    const code=resumeCode||newCode();
+    try{
+      const peer=await makePeer(peerId(code));
+      await new Promise((res,rej)=>{peer.on('open',()=>res());peer.on('error',e=>rej(e))});
+      N.peer=peer;N.code=code;
+      if(saved){N.lobby=saved.lobby;G=saved.G;uid=saved.uid||0}
+      else{N.lobby={players:[{name,cid:myCid}],opt:{...DEFAULT_OPT},started:false};G=null}
+      N.me=0;N.status='';
+      peer.on('connection',c=>{c.on('data',m=>hostOnMsg(c,m));c.on('close',()=>{for(const[k,v]of N.conns)if(v===c)N.conns.delete(k);commit()})});
+      peer.on('disconnected',()=>{N.status='通信サーバーとの接続が切れました。再接続しています…';render();try{peer.reconnect()}catch(e){}});
+      peer.on('error',e=>{N.status='通信エラー：'+(e.type||e.message||e);render()});
+      commit();return;
+    }catch(e){if(resumeCode||!(e&&e.type==='unavailable-id')){N.status='部屋を作れませんでした：'+(e.type||e.message||e);render();return}}
+  }
+}
+function hostOnMsg(c,m){
+  if(m.k==='join'){
+    const L=N.lobby;let seat=L.players.findIndex(p=>p.cid===m.cid);
+    if(seat<0){
+      if(L.started){c.send({k:'reject',why:'この部屋はもうゲームが始まっています'});return}
+      if(L.players.length>=6){c.send({k:'reject',why:'この部屋は満員です（6人まで）'});return}
+      L.players.push({name:String(m.name||'').slice(0,12)||`P${L.players.length+1}`,cid:m.cid});
+    }else if(!L.started&&m.name){L.players[seat].name=String(m.name).slice(0,12)}
+    N.conns.set(m.cid,c);commit();return;
+  }
+  if(m.k==='act'){
+    let cid=null;for(const[k,v]of N.conns)if(v===c)cid=k;
+    const seat=N.lobby.players.findIndex(p=>p.cid===cid);
+    if(seat>=0&&applyAction(seat,m.a))commit();
+  }
+}
+async function joinRoom(code,name){
+  N.mode='client';N.code=code;N.status='部屋に接続しています…';render();
+  store.set('arumono_last_fjoin',{code,name});
+  try{
+    const peer=N.peer||await makePeer();N.peer=peer;
+    if(!peer.open&&!TEST_BC)await new Promise((res,rej)=>{peer.on('open',()=>res());peer.on('error',e=>rej(e))});
+    else if(TEST_BC)await new Promise(r=>setTimeout(r,10));
+    const c=peer.connect(peerId(code),{reliable:true});N.hostConn=c;
+    const t=setTimeout(()=>{if(!c.open){N.status='部屋が見つかりませんでした。部屋番号を確かめてください';render()}},12000);
+    c.on('open',()=>{clearTimeout(t);N.status='';c.send({k:'join',cid:myCid,name});render()});
+    c.on('data',m=>{
+      if(m.k==='sync'){N.skew=(m.now||Date.now())-Date.now();N.lobby=m.lobby;N.view=m.G;N.me=m.you;N.status='';render()}
+      if(m.k==='reject'){N.status=m.why;N.mode=null;render()}
+    });
+    c.on('close',()=>{N.status='ホストとの接続が切れました。';N.lost=true;render()});
+    peer.on('error',e=>{N.status='通信エラー：'+(e.type||e.message||e);render()});
+  }catch(e){N.status='接続できませんでした：'+(e.type||e.message||e);render()}
+}
+function send(a){
+  const seat=LOCAL()?(meSeat()??0):meSeat();
+  if(N.mode==='host'||N.mode==='local'){if(applyAction(seat,a)){if(N.mode==='local')ui.shown=null;commit()}}
+  else if(N.hostConn&&N.hostConn.open)N.hostConn.send({k:'act',a});
+  ui.sel=null;
+}
+
+/* =====================================================================
+   画面
+   ===================================================================== */
+const ui={saved:{},confirmClear:false,sel:null,seq:[],showLog:false,copied:'',name:store.get('arumono_name')||'',code:(new URLSearchParams(location.search).get('room')||'').toUpperCase(),
+  confirmEsc:false,shown:null,peek:null,peekShow:false,localN:4,lopt:{...DEFAULT_OPT},localSetup:false,resetArm:false};
+const V=()=>N.view;
+const LOCAL=()=>N.mode==='local';
+function localSeat(v){
+  if(!v)return null;
+  if(v.phase==='place'){for(const s of seatsFrom(v))if(!v.signed[s])return s;return null}
+  if(v.phase==='point'){for(const s of seatsFrom(v))if(v.picks[s]==null)return s;return null}
+  return curUse(v);
+}
+function meSeat(){return LOCAL()?localSeat(V()):N.me}
+const vpn=i=>{const v=V();return esc((v.names&&v.names[i])||`P${i+1}`)};
+function chip(i){return `<span class="pchip" style="--pc:${PCOL[i]}">${vpn(i)}</span>`}
+const secretOk=()=>!LOCAL()||ui.shown===meSeat(); // 1台回しでは「見る」を押した人だけ
+function myTurnUse(){const v=V();return v&&v.phase==='use'&&curUse(v)===meSeat()}
+function selKey(){if(ui.sel==null||!myTurnUse()||isLabWorker(V(),meSeat()))return null;return V().pool.includes(ui.sel)?ui.sel:null}
+
+function zCard(z){
+  const v=V();const t=ZT[z.type];const selK=selKey();
+  const tgt=selK&&IT[selK].kind==='weapon'&&v.ammo>=IT[selK].ammo&&effAtkIn(v,selK,z)>0;
+  const own=!LOCAL()&&z.hidden&&z.owner===N.me;
+  const cls=['zc'];if(z.hidden)cls.push('back');if(!z.hidden&&z.type==='boss')cls.push('bossc');if(tgt)cls.push('target');if(own)cls.push('own');
+  const dots=z.dmg?`<span class="dots">${'<b></b>'.repeat(z.dmg)}</span>`:'';
+  const frz=z.frozen?'<span class="frz">足止め</span>':'';
+  const mat=v.area===0&&z.mat?`<span class="zmat">素材${z.mat}</span>`:'';
+  let inner;
+  if(z.hidden)inner=`<span class="q">?</span><span class="own" style="--pc:${PCOL[z.owner]}">${vpn(z.owner)}</span><span class="sign ${z.sign}" title="${SIGN[z.sign]}"></span>${own?`<span class="secret">${t.name}<br>体力${t.hp-z.dmg}/${t.hp}・+${t.dg}%${z.mat&&v.area===0?`<br>素材${z.mat}`:''}</span>`:''}${frz}${dots}`;
+  else inner=`<span class="nm">${t.name}</span><span class="hp num">体力 ${t.hp-z.dmg}/${t.hp}</span><span class="dg num">危険度+${t.dg}%</span>${mat}${frz}`;
+  const label=z.hidden?`${vpn(z.owner)}の伏せゾンビ（サイン${SIGN[z.sign]}）`:t.name;
+  const act=tgt?'attack':(LOCAL()&&z.hidden&&!['place','point'].includes(v.phase)?'peek':'');
+  return `<button class="${cls.join(' ')}" ${act?`data-act="${act}" data-id="${z.id}"`:'tabindex="-1"'} aria-label="${label}">${inner}</button>`;
+}
+function goalRow(v){
+  if(v.area===0){
+    const ansC=FILES[v.file].ans;
+    const acards=v.revealed.map((r,i)=>r?`<div class="slot filled" style="border-color:var(--sg)"><span>${i+1}番の解答</span><b>${ansC[i]}</b><span>${IT[MATNO(ansC[i])].name}</span></div>`:`<div class="slot ansback"><span>${i+1}番の解答</span><b>？</b><span>裏向き</span></div>`).join('');
+    return `<div class="row"><div class="rh"><span class="no" style="font-size:16px">解答カード</span><span class="sub">本調合で1番から順にめくる</span></div><div><div class="craft">${acards}</div><div class="farinfo">エリア0のゾンビは素材（1〜6番）を持っている。倒すとその素材が共有アイテムに加わる。研究所に入った1人が、共有アイテムの素材で試験調合か本調合をする。意思のあるゾンビは${v.bossDead?'撃破済み':'まだ倒していない'}</div></div></div>`;
+  }
+  const r=v.rep;let cells='';for(let i=1;i<=r.need;i++)cells+=`<i class="${i<=r.prog?'on':''}"></i>`;
+  const st=v.skipped.includes(v.area)?'諦めた':!r.have?'意思のあるゾンビを倒すと手に入る（ゾンビ山札のどこかに1枚）':r.prog>=r.need?'解読完了':`研究所で解読中（${r.prog}/${r.need}）`;
+  return `<div class="row"><div class="rh"><span class="no" style="font-size:16px">目標</span><span class="sub">${REP[v.area].no}</span></div><div><div class="labbar" style="--n:${r.need}">${cells}</div><div class="farinfo">${st}。解読が終わると次のエリアへ進める</div></div></div>`;
+}
+function renderBoard(){
+  const v=V();const selK=selKey();const gre=selK&&IT[selK].kind==='grenade';
+  let h=goalRow(v);
+  const subs={4:'伏せたまま',3:'伏せたまま',2:'ここで表に',1:'次でエリア内'};
+  for(const s of[4,3,2,1]){
+    const cards=v.slots[s].map(zCard).join('')||'<span class="empty">なし</span>';
+    const gb=gre?`<button class="gbtn" data-act="grenade" data-slot="${s}">ここに閃光</button>`:'';
+    h+=`<div class="row"><div class="rh"><span class="no">${s}</span><span class="sub">${subs[s]}</span>${gb}</div><div class="cells">${cards}</div></div>`;
+  }
+  const ins=v.inside.map(zCard).join('')||'<span class="empty">侵入なし</span>';
+  h+=`<div class="row inside"><div class="rh"><span class="no">エリア内</span><span class="sub">残ると毎ラウンド<br>+${v.inside.reduce((a,z)=>a+ZT[z.type].dg,0)}%</span></div><div class="cells">${ins}</div></div>`;
+  if(v.pending.length||v.phase==='place')h+=`<div class="row"><div class="rh"><span class="no" style="font-size:16px">伏せた</span><span class="sub">次のラウンドの<br>最初にゾーン4へ</span></div><div class="pend">${v.pending.map(z=>`<span class="mini"><span class="sign ${z.sign}"></span>${vpn(z.owner)}</span>`).join('')||'<span class="empty">まだなし</span>'}</div></div>`;
+  $('board').innerHTML=h;
+  $('stats').innerHTML=[['ゾンビ山札',`${v.zDeck.length}枚`],['倒したゾンビ',`${v.zKilled.length}枚`],['このエリアの撃破',`${v.kills}体`],['共有アイテム',`${v.pool.length}個`],['弾',`${v.ammo}発`]]
+    .map(([a,b])=>`<div><span>${a}</span><b class="num">${b}</b></div>`).join('');
+}
+function itemEf(it){return it.kind==='weapon'?`攻撃${it.atk}・${it.reach>=9?'全列':`手前${it.reach}列`}・${it.ammo?`弾${it.ammo}`:'弾不要'}`:it.kind==='spray'?`危険度 −${it.val}%`:it.kind==='mat'?`素材 ${it.no}`:'1列を1ラウンド足止め'}
+function poolHTML(){
+  const v=V();const mine=myTurnUse();const lw=mine&&isLabWorker(v,meSeat());const canUse=mine&&!lw&&v.used<v.opt.useN;
+  const cnt={};v.pool.forEach(k=>cnt[k]=(cnt[k]||0)+1);
+  const keys=IORDER.filter(k=>cnt[k]);
+  const items=keys.map(k=>{const it=IT[k];const isMat=it.kind==='mat';
+    let act='',dis=true,why='';
+    if(isMat&&lw){act='mat';dis=false}
+    else if(!isMat&&canUse){dis=it.kind==='weapon'&&v.ammo<it.ammo;why=dis?'弾が足りない':'';act='item'}
+    const sel=(act==='item'&&ui.sel===k)||(act==='mat'&&ui.seq.includes(k));
+    return `<button class="ic${isMat?' mat':''}${sel?' sel':''}" ${act?`data-act="${act}" data-k="${k}"`:''} ${dis?'disabled':''}><b>${it.name}${cnt[k]>1?` ×${cnt[k]}`:''}</b><span class="ef">${why||itemEf(it)}</span></button>`}).join('');
+  return `<div class="ammo"><span>弾</span><b class="num">${v.ammo}</b><span>発</span></div><div class="hand">${items||'<span class="empty">共有アイテムなし</span>'}</div>`;
+}
+function facHTML(){
+  const v=V();const res=v.results&&['reveal','use','test','craft'].includes(v.phase)?v.results:null;
+  const labTxt=v.area===0?'調合室：試験調合か本調合ができる。1人まで':`解読が1段階進む。何人来ても1ラウンド1段階`;
+  const desc={arm:'サイコロで武器。1閃光 2バット 3ピストル 4アサルト 5ライフル 6マグナム',ammo:'サイコロで弾。1-2→1発 3-4→2発 5-6→3発',med:'薬品スプレー小（6なら大）',lab:labTxt+'。行った人はこのラウンド、アイテムを使えない'};
+  return `<div class="facs">${FKEYS4.map(f=>{const who=res?res.filter(r=>r.f===f):[];
+    return `<div class="fac"><b>${FAC[f].name}</b><span class="cap">${f==='lab'?'1人分':'2人まで'}</span><p>${desc[f]}</p>${who.map(r=>`<div class="fres">${chip(r.p)}<span>${r.die?`<b class="die">${r.die}</b>`:''}${esc(r.got)}</span></div>`).join('')}</div>`}).join('')}</div>`;
+}
+const PHASE_NAME={place:'① ゾンビを伏せる',point:'② 行き先を指差す',reveal:'③ 施設の結果',use:'④ 共有アイテムを使う',test:'④ 共有アイテムを使う',craft:'④ 共有アイテムを使う',clear:'エリア突破',win:'脱出成功',over:'脱出失敗'};
+function renderAct(){
+  const v=V();const me=meSeat();
+  let h=`<h2>${PHASE_NAME[v.phase]||''}</h2><div class="who"><span class="small">エリア${v.area}・ラウンド${v.turn}</span><span class="small">スタート：${chip(v.startP)}</span><span class="tmrline" data-tmr hidden></span></div>`;
+  if(v.phase==='win'||v.phase==='over'){
+    h=`<h2>ゲーム終了</h2><p class="hint">${v.phase==='win'?'ARUMONOが完成し、脱出に成功しました。':'脱出に失敗しました：'+esc(v.overReason)}</p><div class="acts"><button class="btn" data-act="showlog">記録を見る</button></div>`;
+  }else if(v.phase==='place'){
+    const done=v.signed.filter(Boolean).length;
+    h+=`<p class="hint">全員がゾンビを1枚ずつ引いて、サインを付けて伏せます（${done}/${v.n}人）。</p>`;
+    if(!LOCAL()&&v.signed[me])h+=`<p class="hint">あなたは伏せ終わりました。ほかの人を待っています。</p>`;
+  }else if(v.phase==='point'){
+    const done=v.picks.filter(x=>x!=null).length;
+    const mineOpen=me!=null&&v.picks[me]==null&&secretOk();
+    h+=`<p class="hint">全員が伏せたまま行き先を選びます（${done}/${v.n}人）。<b>相談は禁止</b>です。そろったら一斉に公開します。</p>`;
+    if(mineOpen){
+      const lab=v.area===0?'':(!v.rep.have?'（まだレポートがないので、研究は進まない）':v.rep.prog>=v.rep.need?'（解読は終わっている）':`（今 ${v.rep.prog}/${v.rep.need}）`);
+      h+=`<p><b>${vpn(me)}</b>の行き先を選んでください${LOCAL()?'（ほかの人は見ないで）':''}。</p><div class="pickgrid">${FKEYS4.map(f=>`<button class="pickbtn" data-act="pick" data-f="${f}"><b>${FAC[f].name}</b><span>${f==='lab'?(v.area===0?'調合室で作業':'解読を1段階進める'+lab):f==='arm'?'武器をサイコロで':f==='ammo'?'弾をサイコロで':'薬品スプレー'}</span></button>`).join('')}</div>`;
+    }else if(!LOCAL()&&v.picks[me]!=null)h+=`<p class="hint">あなたは「${FAC[v.picks[me]].name}」を選びました。ほかの人を待っています。</p>`;
+  }else if(v.phase==='reveal'){
+    h+=`<p class="hint">行き先を公開しました。結果を確認したら次へ進みます。</p><div class="acts"><button class="btn pri" data-act="go">${v.clearReady?'エリア突破へ':'アイテムを使う段階へ'}</button></div>`;
+  }else if(['use','test','craft'].includes(v.phase)){
+    const c=curUse(v);const mine=c===me;
+    const left=v.useOrder.slice(v.ucur).map(chip).join(' → ');
+    h+=`<p class="hint">スタートプレイヤーから順に、共有アイテムを1人${v.opt.useN}個まで使います。順番：${left}</p>`;
+    if(v.labbers.length&&v.area!==0)h+=`<p class="hint">${v.labbers.map(chip).join('・')}は研究所にいるので、このラウンドはアイテムを使えません。</p>`;
+    else if(v.area===0&&v.labbers.length>1)h+=`<p class="hint">${v.labbers.filter(s=>s!==v.labWorker).map(chip).join('・')}は研究所にいるので、このラウンドはアイテムを使えません。</p>`;
+    if(!mine)h+=`<p class="hint">${chip(c)}の番です。</p>`;
+    else if(isLabWorker(v,c)){
+      h+=`<p><b>${vpn(c)}</b>は調合室にいます。下の共有アイテムから素材を選んで、試験調合（2つ）か本調合（4つ）をしてください。選んだ順に左→右、1番→4番に入ります。</p>
+      <div class="seq">${[0,1,2,3].map(i=>{const k=ui.seq[i];return `<div class="slot${k?' filled':''}"><span>${i<2?(i?'右／2番':'左／1番'):(i+1)+'番'}</span><b>${k?IT[k].no:'・'}</b><span>${k?IT[k].name:'空き'}</span></div>`}).join('')}</div>
+      <div class="acts"><button class="btn warn" data-act="labtest" ${ui.seq.length===2?'':'disabled'}>試験調合（2つ）</button><button class="btn warn" data-act="labcraft" ${ui.seq.length===4?'':'disabled'}>本調合（4つ）</button>${ui.seq.length?'<button class="btn" data-act="seqclear">選び直す</button>':''}<button class="btn" data-act="pass">何もしない</button></div>
+      <p class="small">試験調合：両方が正解に使う素材なら「反応あり」とどちらが先か分かり、素材は残る。違えば爆発（危険度+${TEST_PEN}%、2つとも失う）。本調合：解答カードを1番から順にめくり、違った枠で止まって失敗（危険度+${CRAFT_PEN}%、4つとも失う）。失った素材は、同じ番号のゾンビを倒せばまた手に入る。</p>`;
+    }else{
+      const selK=selKey();
+      if(selK){const it=IT[selK];h+=`<p class="hint"><b>${it.name}</b>：${it.kind==='weapon'?`${it.reach>=9?'どの列のゾンビも攻撃できます':`ゾンビがいる列を手前から数えて${it.reach}列目までのゾンビを攻撃できます`}${it.ammo?`（弾${it.ammo}発を使う）`:''}。光っているゾンビを選んでください。`:it.kind==='grenade'?'盤上のアプローチゾーン1〜4から「ここに閃光」を選んでください。':`危険度を${it.val}%下げます。`}</p>`}
+      else h+=`<p><b>${vpn(c)}</b>の番です。${v.used?`あと${v.opt.useN-v.used}個使えます。`:'下の共有アイテムをタップして使うか、パスしてください。'}</p>`;
+      h+=`<div class="acts">${selK&&IT[selK].kind==='spray'?'<button class="btn warn" data-act="spray">使う</button>':''}${selK?'<button class="btn" data-act="cancel">選び直す</button>':''}${!selK?`<button class="btn${v.used?' pri':''}" data-act="pass">${v.used?'手番を終える':'パス'}</button>`:''}</div>`;
+      if(v.area!==0&&v.bossDead&&!decoded(v)&&!selK)h+=`<div class="msg">意思のあるゾンビは倒しました。研究レポートの解読を諦めれば、今すぐ次のエリアへ進めます。ただし${REP[v.area].no}は二度と読めません。<div class="acts" style="margin-top:8px">${ui.confirmEsc?`<button class="btn warn" data-act="escape">本当に諦めて進む</button><button class="btn" data-act="noesc">やめる</button>`:`<button class="btn warn" data-act="askesc">解読を諦めて先へ進む</button>`}</div></div>`;
+    }
+    if(v.msg)h+=`<div class="msg">${esc(v.msg)}</div>`;
+  }else h+=`<p class="hint">画面の案内に沿って進めてください。</p>`;
+  $('actPanel').innerHTML=h;
+  $('pool').innerHTML=poolHTML();
+  $('facs').innerHTML=facHTML();
+}
+function renderSide(){
+  const v=V();const L=N.lobby;const me=meSeat();
+  const picked=['reveal','use','test','craft'].includes(v.phase);
+  $('players').innerHTML=seatsFrom(v).map(i=>{const on=LOCAL()||!L||!L.players[i]?true:L.players[i].on;
+    let st='';
+    if(v.phase==='place')st=v.signed[i]?'伏せた':'伏せている…';
+    else if(v.phase==='point')st=v.picks[i]!=null?'選んだ':'選んでいる…';
+    else if(picked)st=FAC[v.picks[i]||'none'].name;
+    return `<div class="${['use','test','craft'].includes(v.phase)&&curUse(v)===i?'now':''}"><span>${chip(i)}${!LOCAL()&&i===N.me?' <span class="small">（あなた）</span>':''}${i===v.startP?' <span class="small">（スタート）</span>':''}${on?'':' <span class="small" style="color:var(--blood)">切断中</span>'}</span><span class="small">${st}</span></div>`}).join('');
+  $('reports').innerHTML=`<span class="filetag">研究ファイル${v.file}</span>`+[1,2,3].map(a=>{const r=v.reports.find(x=>x.a===a);
+    if(r)return `<div class="report"><b>${r.no}</b><span class="st">${r.story}</span>${r.text.map(t=>`・${t}`).join('<br>')}</div>`;
+    let why='';if(v.skipped.includes(a))why='解読を諦めたため、読めなかった';else if(v.area===a&&v.rep)why=v.rep.have?`解読中（${v.rep.prog}/${v.rep.need}）`:'エリアの意思のあるゾンビを倒すと手に入る';else why=`エリア${a}で手に入る`;
+    return `<div class="report locked"><b>${REP[a].no}</b>${why}</div>`}).join('');
+  $('log').innerHTML=v.log.slice(0,150).map(l=>`<li><span class="t">${l.t}</span>${esc(l.m)}</li>`).join('');
+}
+function renderHeader(){
+  const v=V();
+  $('hArea').textContent=v?`エリア${v.area}`:(LOCAL()?'1台回し':'ロビー');$('hTurn').textContent=v?`ラウンド${v.turn}`:'—';
+  const dv=v?Math.min(v.danger,100):0;const d=$('hDanger');d.textContent=`${dv}%`;d.classList.toggle('hot',dv>=70);
+  let b='';for(let i=1;i<=10;i++)b+=`<i class="${dv>=i*10?'on':''}${i>=7?' hi':''}"></i>`;$('hBar').innerHTML=b;
+  $('hRoom').textContent=N.code?`部屋 ${N.code}${N.mode==='host'?'（ホスト）':''}`:'';$('hRoom').hidden=!N.code;
+  const r=$('resetBtn');r.hidden=!LOCAL()||!v;r.textContent=ui.resetArm?'もう一度押すとやめる':'最初から';r.classList.toggle('arm',ui.resetArm);
+}
+function optsHTML(o,editable){
+  const seg=(act,vals,cur,lab)=>`<span class="seg">${vals.map(([x,t])=>`<button class="${cur===x?'on':''}" data-act="${act}" data-v="${x}" ${editable?'':'disabled'}>${t}</button>`).join('')}</span>`;
+  return `<fieldset class="opts"><legend>テスト用の設定${N.mode==='host'?'（ホストだけ変更できます）':''}</legend>
+    <div>1人が1ラウンドに使えるアイテム${seg('ouse',[[1,'1個'],[2,'2個']],o.useN)}</div>
+    <div>銃を使ったら${seg('oguns',[['0','捨て札（使い捨て）'],['1','残る（弾だけ減る）']],o.keepGuns?'1':'0')}</div>
+    <div>研究に必要なラウンド${seg('olab',[['std','5/7/10'],['short','3/5/7']],o.lab)}</div>
+    <div>開始エリア${seg('oarea',[[1,'1'],[2,'2'],[3,'3'],[0,'0']],o.startArea)}</div>
+    <div>1人の制限時間${seg('otimer',[[0,'なし'],[30,'30秒'],[45,'45秒'],[60,'60秒']],o.timer||0)}</div>
+    <div>研究ファイル${seg('ofile',[['R','ランダム'],...FKEYS.map(k=>[k,k])],o.file)}</div>
+  </fieldset><p class="small">「銃を使ったら」はテスト用の切り替えです。TKさんの案は「捨て札（使い捨て）」。途中のエリアから始めると、それより前の研究レポートは解読済みで始まります。</p>`;
+}
+function lobbyHTML(){
+  if(N.mode&&N.mode!=='local'&&!N.lobby)return `<h3>接続中</h3><p>${esc(N.status||'お待ちください…')}</p><button class="btn" data-act="home">はじめの画面に戻る</button>`;
+  if(ui.localSetup){
+    return `<h3>1台で回して遊ぶ</h3><p>1台の端末を順番に回して遊びます。ゾンビを伏せるときと行き先を選ぶときは、その人だけが画面を見てください。</p>
+    <div class="pcount">${[2,3,4,5,6].map(n=>`<button class="${n===ui.localN?'on':''}" data-act="lcount" data-n="${n}">${n}</button>`).join('')}</div>
+    ${optsHTML(ui.lopt,true)}
+    <div class="acts"><button class="btn pri" data-act="lstart">${ui.localN}人で始める</button><button class="btn" data-act="home">戻る</button></div>`;
+  }
+  if(!N.mode){
+    const lastHost=store.get('arumono_last_fhost');
+    return `<h3>ARUMONO 施設ルール（テスト版）</h3>
+    <p>アイテムカードを引く代わりに、毎ラウンド全員が伏せたまま行き先（武器庫・弾薬庫・薬品庫・研究所）を一斉に選び、手に入れたアイテムを全員で共有する新しいルール案です。<a href="./">今までのルール</a>もそのまま遊べます。</p>
+    ${N.status?`<p class="warnline">${esc(N.status)}</p>`:''}
+    <label class="fld">あなたの名前（オンラインで使う）<input id="inName" maxlength="12" value="${esc(ui.name)}" placeholder="例：たくみ" autocomplete="nickname"></label>
+    <div class="twocol">
+      <div class="box"><b>部屋を作る</b><p class="small">あなたがホストになります。最後まで画面を開いたままにしてください。</p><button class="btn pri" data-act="host">部屋を作る</button>
+      ${lastHost&&store.get('arumono_fhost_'+lastHost)?`<button class="btn" data-act="resume" style="margin-top:6px">前回の部屋（${lastHost}）を再開</button>`:''}</div>
+      <div class="box"><b>部屋に参加する</b><label class="fld">部屋番号<input id="inCode" maxlength="4" value="${esc(ui.code)}" placeholder="例：K7QM" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.2em"></label><button class="btn pri" data-act="join">参加する</button></div>
+      <div class="box"><b>1台で回して遊ぶ</b><p class="small">スマホやPC 1台を順番に渡して遊びます。</p><button class="btn pri" data-act="localsetup">人数を選ぶ</button></div>
+    </div>`;
+  }
+  const L=N.lobby;const host=N.mode==='host';
+  const link=location.origin+location.pathname+'?room='+N.code;
+  return `<h3>部屋 ${N.code}</h3>
+    <p>ほかの人は、この部屋番号を入力するか、招待リンクを開いて参加します。</p>
+    <div class="roomcode">${N.code}</div>
+    <div class="copyrow"><input id="inviteLink" readonly value="${esc(link)}"><button class="btn" data-act="copylink">リンクをコピー</button></div>
+    ${ui.copied?`<p class="small">${esc(ui.copied)}</p>`:''}
+    <div><b>参加者（${L.players.length}/6）</b><div class="players" style="margin-top:6px">${L.players.map((p,i)=>`<div><span class="pchip" style="--pc:${PCOL[i]}">${esc(p.name)}</span><span class="small">${i===0?'ホスト':''}${p.cid===myCid?'（あなた）':''}${p.on?'':' 切断中'}</span></div>`).join('')}</div></div>
+    ${optsHTML(L.opt,host)}
+    ${host?`<button class="btn pri" data-act="startgame" ${L.players.length<2?'disabled':''}>${L.players.length<2?'2人以上集まると始められます':`${L.players.length}人で始める`}</button>`:`<p class="small">ホストがゲームを始めるのを待っています。</p>`}
+    ${N.status?`<p class="warnline">${esc(N.status)}</p>`:''}`;
+}
+function resultCardHTML(c){
+  const rows=c.rows.map((r,i)=>`<tr class="${r.ok===false?'cur':''}"><td>${i+1}番</td><td>${IT[r.placed].name}（${IT[r.placed].no}）</td><td>${r.answer?`${IT[r.answer].name}（${IT[r.answer].no}）`:'裏向きのまま'}</td><td>${r.ok===true?'○':r.ok===false?'×':'—'}</td></tr>`).join('');
+  return `<div class="tblwrap"><table class="tbl"><thead><tr><th>枠</th><th>入れた素材</th><th>解答カード</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p>${c.failAt<0?'4枚すべて一致しました。':`${c.failAt+1}番で違っていたので、ここで止めます。危険度+${CRAFT_PEN}%、使った素材4つは失われます（同じ番号のゾンビを倒せばまた手に入ります）。めくった解答カードは表のまま残ります。`}</p>`;
+}
+function renderOverlay(){
+  const ov=$('ov'),d=$('dlg');const v=V();let h='';let wide=false;
+  const me=meSeat();
+  if(!v){h=lobbyHTML();wide=true}
+  else if(ui.showLog){
+    const sum=summaryRows(v).map(([a,b])=>`<div class="${['調整ルール','結果','人数','解読したレポート'].includes(a)?'full':''}"><span>${a}</span><b>${b}</b></div>`).join('');
+    const rows=v.hist.map(x=>`<tr><td>E${x.a}-R${x.t}</td><td class="${x.d>=70?'hot':''}">${x.d}%</td><td>${x.k}</td><td>${x.z}</td><td>${x.in}</td><td>${x.pool}</td><td>${x.ammo}</td><td>${x.lab}</td></tr>`).join('')||'<tr><td colspan="8">まだ1ラウンドも終わっていません</td></tr>';
+    h=`<h3>テスト記録</h3><div class="sum">${sum}</div>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>ラウンド</th><th>危険度</th><th>撃破(累計)</th><th>盤上</th><th>エリア内</th><th>共有アイテム</th><th>弾</th><th>研究</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${analyticsHTML(v)}
+    <div><p class="small" style="margin-bottom:4px">記録全文（コピーして貼り付けると分析に使えます）</p><textarea class="exp" id="expText" readonly>${esc(exportText(v))}</textarea></div>
+    ${ui.copied?`<p class="small">${esc(ui.copied)}</p>`:''}
+    <div class="acts"><button class="btn pri" data-act="copylog">記録をコピー</button><button class="btn" data-act="hidelog">閉じる</button></div>`;wide=true;
+  }else if(LOCAL()&&ui.peek!=null){
+    const f=v.slots&&allZIn(v).find(z=>z.id===ui.peek);
+    if(!f||!f.hidden){ui.peek=null}
+    else if(!ui.peekShow)h=`<h3>${vpn(f.owner)}だけ見てください</h3><p>この伏せゾンビの持ち主は${vpn(f.owner)}です。ほかの人は画面から目をそらしてください。</p><div class="acts"><button class="btn pri" data-act="peekshow">中身を見る</button><button class="btn" data-act="peekclose">やめる</button></div>`;
+    else{const t=ZT[f.type];h=`<h3>${vpn(f.owner)}の伏せゾンビ</h3><div class="bigcard"><span class="nm">${t.name}</span><div class="row2"><span>体力 ${t.hp-f.dmg}/${t.hp}</span><span>危険度+${t.dg}%</span>${v.area===0&&f.mat?`<span>素材${f.mat}</span>`:''}</div></div><p class="warnline">名前や数値は口にしないでください。</p><button class="btn pri" data-act="peekclose">隠して戻る</button>`}
+  }
+  if(!h&&v&&!ui.showLog){
+    if(LOCAL()&&['place','point'].includes(v.phase)&&me!=null&&ui.shown!==me){
+      h=`<h3>${chip(me)} の番です</h3><p>${v.phase==='place'?'ゾンビを1枚引いて、サインを付けて伏せます。':'伏せたまま行き先を選びます。<b>相談は禁止</b>です。'}端末を${vpn(me)}に渡してください。</p><p class="warnline">ほかの人は画面を見ないでください。</p><div class="acts"><button class="btn pri" data-act="show">${v.phase==='place'?'ゾンビを引く':'行き先を選ぶ'}</button><button class="btn" data-act="showlog">記録を見る</button></div>`;
+    }else if(v.phase==='place'&&me!=null&&!v.signed[me]&&v.drawn[me]&&secretOk()){
+      const z=v.drawn[me];const t=ZT[z.type];
+      h=`<h3>${LOCAL()?vpn(me)+'が':''}引いたゾンビ</h3><div class="bigcard${z.type==='boss'?' boss':''}"><span class="nm">${t.name}</span><div class="row2"><span>体力 ${t.hp}</span><span>危険度+${t.dg}%</span></div>${v.area===0&&z.mat?`<div class="row2"><span>素材${z.mat}「${IT[MATNO(z.mat)].name}」を持っている</span></div>`:''}</div>
+      <p>サインを1つ選んで伏せてください。仲間に伝えられるのはこの色だけです。名前や数値は口にしないでください。</p><div class="signs">${['g','y','r'].map(s=>`<button class="sbtn" data-act="sign" data-s="${s}"><span class="sb ${s}"></span>${SIGN[s]}</button>`).join('')}</div><span class="tmrline" data-tmr hidden></span>`;
+    }else if(v.phase==='reveal'){
+      const rows=seatsFrom(v).map(s=>{const r=v.results.find(x=>x.p===s);return `<tr><td>${chip(s)}</td><td>${FAC[r.f].name}</td><td>${r.die||'—'}</td><td style="text-align:left;white-space:normal">${esc(r.got)}</td></tr>`}).join('');
+      h=`<h3>せーの！行き先を公開</h3><div class="tblwrap"><table class="tbl"><thead><tr><th>プレイヤー</th><th>行き先</th><th>サイコロ</th><th style="text-align:left">結果</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${v.clearReady?`<p><b>${REP[v.area].no}の解読が終わりました！</b></p>`:''}
+      <p class="small">共有アイテム：${v.pool.length?[...new Set(v.pool)].map(k=>IT[k].name+(v.pool.filter(x=>x===k).length>1?`×${v.pool.filter(x=>x===k).length}`:'')).join('・'):'なし'}／弾${v.ammo}発</p>
+      <div class="acts"><button class="btn pri" data-act="go">${v.clearReady?'エリア突破へ':'アイテムを使う段階へ'}</button><button class="btn" data-act="hideov">盤面を見る</button></div>`;wide=true;
+      if(ui.hideReveal===v.rev)h='';
+    }else if(v.phase==='clear'){
+      const r=v.reports.find(x=>x.a===v.area);const nx=NEXT[v.area];
+      h=`<h3>エリア${v.area} ${r?'解放！':'突破'}</h3>${r?`<div class="report"><b>${r.no}</b><span class="st">${r.story}</span>${r.text.map(t=>`・${t}`).join('<br>')}</div>`:`<div class="report locked"><b>${REP[v.area].no}</b>解読を諦めた。エリア0の推理はそのぶん難しくなります。</div>`}
+      <p>エリア${nx}のゾンビ山札を作り直します。危険度は0%に戻り、共有アイテムは釘バット・ピストル銃・弾${START_AMMO}発に戻ります。${nx===0?'エリア0のゾンビは素材を持っていて、倒すと共有アイテムに加わります。研究所は調合室になります。':''}</p>
+      <div class="acts"><button class="btn pri" data-act="next">エリア${nx}へ進む</button><button class="btn" data-act="showlog">記録を見る</button></div>${LOCAL()?'':'<p class="small">誰が押しても全員が次のエリアへ進みます。</p>'}`;
+    }else if(v.phase==='test'){
+      const t=v.lastTest;const col={order:'反応あり',reverse:'反応あり',boom:'爆発'}[t.res];
+      h=`<h3>試験調合の結果</h3><div class="bigcard"><span class="nm">${col}</span><div class="row2"><span>左：${IT[t.l].name}（${IT[t.l].no}）</span><span>右：${IT[t.r].name}（${IT[t.r].no}）</span></div></div>
+      <p>${t.res==='boom'?`少なくとも一方は、ARUMONOに使わない素材です。危険度が${TEST_PEN}%上がり、2つとも失われます。`:`どちらもARUMONOに使う素材です。<b>${t.res==='order'?IT[t.l].name:IT[t.r].name}</b>のほうが先に入ります。2つとも共有アイテムに残ります。`}</p>
+      <button class="btn pri" data-act="resok">続ける</button>`;
+    }else if(v.phase==='craft'){
+      h=`<h3>本調合の結果</h3>${resultCardHTML(v.lastCraft)}<button class="btn pri" data-act="resok">続ける</button>`;wide=true;
+    }else if(v.phase==='win'||v.phase==='over'){
+      const ctl=N.mode==='host'||LOCAL();
+      h=`${v.phase==='win'?`<h3>ARUMONO完成。脱出成功！</h3>${resultCardHTML(v.lastCraft)}`:`<h3>脱出失敗</h3><p class="warnline">${esc(v.overReason)}</p><p>エリア${v.area}・ラウンド${v.turn}で失敗しました。</p>`}
+      <div class="acts"><button class="btn pri" data-act="showlog">記録を見る</button>${ctl?`<button class="btn" data-act="again">同じメンバーでもう一度</button><button class="btn" data-act="tolobby">設定を変える</button>`:''}<button class="btn" data-act="view">盤面を見る</button></div>
+      ${ctl?'':'<p class="small">もう一度遊ぶときは、ホストが始めます。</p>'}`;wide=true;
+      if(ui.viewBoard)h='';
+    }
+  }
+  if(N.lost&&N.mode==='client'){h=`<h3>接続が切れました</h3><p>${esc(N.status)}</p><div class="acts"><button class="btn pri" data-act="rejoin">再接続する</button><button class="btn" data-act="home">はじめの画面に戻る</button></div>`;wide=false}
+  if(h){d.className=wide?'dlg wide':'dlg';if(d.innerHTML!==h){const keep=document.activeElement&&document.activeElement.id;const val=keep&&$(keep)?$(keep).value:null;d.innerHTML=h;if(keep&&$(keep)){$(keep).value=val;$(keep).focus()}}ov.hidden=false}else ov.hidden=true;
+}
+function allZIn(v){const r=[];for(const s of[4,3,2,1])r.push(...v.slots[s]);r.push(...v.inside);return r}
+let lastRev=-1;
+function render(){
+  const v=V();
+  if(v&&(v.phase==='win'||v.phase==='over')&&v.gid&&!ui.saved[v.gid]){ui.saved[v.gid]=1;saveRecord(v)}
+  if(v&&v.rev!==lastRev){lastRev=v.rev;ui.sel=null;ui.seq=[];ui.confirmEsc=false;if(v.phase!=='win'&&v.phase!=='over')ui.viewBoard=false}
+  renderHeader();renderOverlay();
+  $('gameArea').hidden=!v;if(!v)return;
+  renderBoard();renderAct();renderSide();updateTimer();
+}
+
+/* ---------- 操作 ---------- */
+function setOpt(k,val){
+  if(N.mode==='host'){N.lobby.opt[k]=val;commit()}else if(ui.localSetup){ui.lopt[k]=val;render()}
+}
+document.addEventListener('input',e=>{if(e.target.id==='inName')ui.name=e.target.value;if(e.target.id==='inCode')ui.code=e.target.value.toUpperCase()});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act;
+  if(a!=='reset')ui.resetArm=false;
+  const needName=()=>{const n=(ui.name||'').trim();if(!n){N.status='名前を入れてください';render();return null}store.set('arumono_name',n);return n};
+  const v=V();
+  switch(a){
+    case 'host':{const n=needName();if(n){N.status='';hostStart(n)}return}
+    case 'resume':{const c=store.get('arumono_last_fhost');hostStart(ui.name||'ホスト',c);return}
+    case 'join':{const n=needName();const c=(ui.code||'').trim().toUpperCase();if(!n)return;if(c.length!==4){N.status='部屋番号は4文字です';render();return}N.status='';joinRoom(c,n);return}
+    case 'rejoin':{N.lost=false;const j=store.get('arumono_last_fjoin');N.hostConn=null;joinRoom(j.code,j.name);return}
+    case 'home':if(ui.localSetup&&!N.mode){ui.localSetup=false;break}location.href=location.pathname+(TEST_BC?'?transport=bc':'');return;
+    case 'localsetup':ui.localSetup=true;break;
+    case 'lcount':ui.localN=+b.dataset.n;break;
+    case 'lstart':N.mode='local';ui.localSetup=false;newGame(Array.from({length:ui.localN},(_,i)=>`P${i+1}`),ui.lopt);ui.shown=null;commit();return;
+    case 'ouse':setOpt('useN',+b.dataset.v);return;
+    case 'oguns':setOpt('keepGuns',b.dataset.v==='1');return;
+    case 'olab':setOpt('lab',b.dataset.v);return;
+    case 'oarea':setOpt('startArea',+b.dataset.v);return;
+    case 'otimer':setOpt('timer',+b.dataset.v);return;
+    case 'ofile':setOpt('file',b.dataset.v);return;
+    case 'startgame':if(N.mode==='host'&&N.lobby.players.length>=2){N.lobby.started=true;newGame(N.lobby.players.map(p=>p.name),N.lobby.opt);ui.viewBoard=false;ui.showLog=false;commit()}return;
+    case 'again':
+      if(N.mode==='host'){newGame(N.lobby.players.map(p=>p.name),N.lobby.opt);ui.viewBoard=false;ui.showLog=false;commit()}
+      else if(LOCAL()){newGame(v.names,v.opt);ui.viewBoard=false;ui.showLog=false;ui.shown=null;commit()}return;
+    case 'tolobby':
+      if(N.mode==='host'){G=null;N.lobby.started=false;ui.viewBoard=false;commit()}
+      else if(LOCAL()){ui.lopt={...v.opt};ui.localN=v.n;G=null;N.view=null;N.mode=null;ui.localSetup=true;ui.viewBoard=false}break;
+    case 'reset':if(!LOCAL()||!v)break;if(ui.resetArm){ui.lopt={...v.opt};ui.localN=v.n;G=null;N.view=null;N.mode=null;ui.localSetup=true;ui.resetArm=false;ui.showLog=false}else ui.resetArm=true;break;
+    case 'copylink':case 'copylog':{const t=a==='copylink'?$('inviteLink').value:exportText(V());const done=m=>{ui.copied=m;render();const el=a==='copylink'?$('inviteLink'):$('expText');if(el&&m.startsWith('自動')){el.focus();el.select()}};
+      try{navigator.clipboard.writeText(t).then(()=>done('コピーしました')).catch(()=>done('自動でコピーできませんでした。選択された文字をコピーしてください'))}catch(_){done('自動でコピーできませんでした。選択された文字をコピーしてください')}return}
+    case 'showlog':if(v){ui.showLog=true;ui.copied=''}break;
+    case 'hidelog':ui.showLog=false;break;
+    case 'dl':{if(v&&!exportKind(v,b.dataset.k))ui.copied='ファイルを保存できませんでした。「記録をコピー」を使ってください';break}
+    case 'askclear':ui.confirmClear=true;break;
+    case 'noclear':ui.confirmClear=false;break;
+    case 'clearrec':store.del(REC_KEY);ui.confirmClear=false;break;
+    case 'view':ui.viewBoard=true;break;
+    case 'hideov':ui.hideReveal=v.rev;break;
+    case 'show':ui.shown=meSeat();break;
+    case 'peek':ui.peek=+b.dataset.id;ui.peekShow=false;break;
+    case 'peekshow':ui.peekShow=true;break;
+    case 'peekclose':ui.peek=null;ui.peekShow=false;break;
+    case 'item':{const k=b.dataset.k;ui.sel=ui.sel===k?null:k;break}
+    case 'mat':{const k=b.dataset.k;const i=ui.seq.indexOf(k);if(i>=0)ui.seq.splice(i,1);else if(ui.seq.length<4)ui.seq.push(k);break}
+    case 'seqclear':ui.seq=[];break;
+    case 'cancel':ui.sel=null;break;
+    case 'askesc':ui.confirmEsc=true;break;
+    case 'noesc':ui.confirmEsc=false;break;
+    case 'sign':send({t:'sign',s:b.dataset.s});break;
+    case 'pick':send({t:'pick',f:b.dataset.f});break;
+    case 'go':send({t:'go'});break;
+    case 'attack':if(ui.sel)send({t:'use',k:ui.sel,id:+b.dataset.id});break;
+    case 'grenade':if(ui.sel)send({t:'use',k:ui.sel,slot:+b.dataset.slot});break;
+    case 'spray':if(ui.sel)send({t:'use',k:ui.sel});break;
+    case 'pass':send({t:'pass'});break;
+    case 'labtest':send({t:'labtest',seq:[...ui.seq]});ui.seq=[];break;
+    case 'labcraft':send({t:'labcraft',seq:[...ui.seq]});ui.seq=[];break;
+    case 'resok':send({t:'resok'});break;
+    case 'escape':ui.confirmEsc=false;send({t:'escape'});break;
+    case 'next':send({t:'next'});break;
+  }
+  render();
+});
+window.addEventListener('beforeunload',e=>{if((N.mode==='host'||N.mode==='local')&&G&&G.phase!=='win'&&G.phase!=='over'){e.preventDefault();e.returnValue=''}});
+if(ui.code){const j=store.get('arumono_last_fjoin');if(j&&j.code===ui.code&&j.name){ui.name=j.name}}
+
+/* ---------- 制限時間 ---------- */
+function tick(){
+  if(!G||(N.mode!=='host'&&N.mode!=='local'))return;
+  const sec=G.opt.timer||0;
+  let key=null,seats=null;
+  if(sec>0){
+    if(G.phase==='place'||G.phase==='point'){
+      if(N.mode==='host'){key=`${G.area}-${G.turn}-${G.phase}`;seats=seatsFrom(G)}
+      else{const s=localSeat(G);if(s!=null&&ui.shown===s){key=`${G.area}-${G.turn}-${G.phase}-${s}`;seats=[s]}}
+    }else if(G.phase==='use'){key=`${G.area}-${G.turn}-use-${G.ucur}`;seats=[curUse(G)]}
+  }
+  if(!key){if(G.deadline){G.deadline=null;commit()}return}
+  if(G.timerKey!==key||!G.deadline){G.timerKey=key;G.deadline=Date.now()+sec*1000;commit();return}
+  if(Date.now()>=G.deadline){G.deadline=null;if(timeoutSeats(seats)){if(N.mode==='local')ui.shown=null}commit()}
+}
+function updateTimer(){
+  const v=V();const rem=v&&v.deadline?Math.max(0,Math.ceil((v.deadline-(Date.now()+(N.mode==='client'?(N.skew||0):0)))/1000)):null;
+  const h=$('hTimer');if(h){h.hidden=rem==null;if(rem!=null){h.textContent=`残り${rem}秒`;h.classList.toggle('hot',rem<=10)}}
+  document.querySelectorAll('[data-tmr]').forEach(el=>{el.hidden=rem==null;if(rem!=null){el.textContent=`残り${rem}秒`;el.classList.toggle('hot',rem<=10)}});
+}
+setInterval(()=>{tick();updateTimer()},250);
+render();
+
+</script>
+</body>
+</html>
